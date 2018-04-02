@@ -1,0 +1,53 @@
+#!/bin/bash
+
+source $NS_WDIR/lib/automation_util
+PARTITION=$(get_test_partition)
+
+function main(){
+    case $(get_tname) in
+        "SMOKE-037-001") validate_rbu_data ;;
+         *) handle_unknown_case ;;
+         ?) handle_unknown_case ;;
+    esac
+}
+
+
+function handle_unknown_case(){
+    log_status_and_exit_ex "FAIL" "testcase not found"
+    echo "FAIL" "testcase not found"
+    exit 1
+}
+
+function validate_rbu_data(){
+    while read x y z
+    do
+        metric=$x
+        metric_position=$y
+        db_header=$z
+        csvData=( $(cut -d ',' -f $metric_position /home/netstorm/work/logs/TR${T_RUN_ID}/${PARTITION}/reports/csv/PageRBUDetailRecord.csv) )
+        i=0
+        for line in $(python /home/automation/workbench/automation/nscore/lib/parseHar.py $T_RUN_ID $PARTITION $metric); do
+            debug_log "value of $metric in ${i}th csv row: ${csvData[$i]}"
+            debug_log "value of $metric in ${i}th har file: $line"
+            if [ $line -ne ${csvData[$i]} ]; then
+                log_status_and_exit_ex "FAIL" "RBU data validation for $metric failed while comparing csv with har file"
+            fi
+            i=$((i+1))
+        done
+
+        dbname="test"
+        username="netstorm"
+        i=0
+        for line in $(psql -U $username -d $dbname -t -c "select $z from pagerbudetailrecord_$T_RUN_ID;"); do 
+            debug_log "value of $metric in ${i}th database tuple: $line"
+            if [ ${line} -ne ${csvData[$i]} ];then
+                log_status_and_exit_ex "FAIL" "RBU data validation for $metric failed while comparing csv with database records"
+            fi
+            i=$((i+1)) 
+        done
+    done < /home/automation/workbench/automation/nscore/smoke/testcases/SmokeTest_RBU/rbu_params
+    log_status_and_exit_ex "PASS" "RBU data validation between HAR and CSV Passed"
+}
+
+main
+exit 0

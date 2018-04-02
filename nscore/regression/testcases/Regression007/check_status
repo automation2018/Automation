@@ -1,0 +1,240 @@
+#!/usr/bin/env bash
+
+source $NS_WDIR/lib/automation_util
+
+
+PROGRESS_REPORT_FILE="$NS_WDIR/logs/TR$T_RUN_ID/progress.report"
+SUMMARY_GDF_FILE="$NS_WDIR/logs/TR$T_RUN_ID/summary_gdf.data"
+MONITOR_LOG_FILE="$NS_WDIR/logs/TR$T_RUN_ID/monitor.log"
+GLOBAL_DAT_FILE="$NS_WDIR/logs/TR$T_RUN_ID/global.dat"
+RTC_ALL_LOG_FILE="$NS_WDIR/logs/TR$T_RUN_ID/runtime_changes/runtime_changes_all.log"
+CONF_FILE="$NS_WDIR/logs/TR$T_RUN_ID/scenario"
+
+
+function main(){
+    case $(get_tname) in
+        "REG-007-001") handle_reg_001_case ;;
+        "REG-007-002") handle_reg_002_case ;;
+        "REG-007-003") handle_reg_003_case ;;
+        "REG-007-004") handle_reg_004_case ;;
+        "REG-007-005") handle_reg_005_case ;;
+        "REG-007-006") handle_reg_006_case ;;
+        *) handle_unknown_case ;;
+        ?) handle_unknown_case ;;
+    esac
+}
+
+
+function get_status_rtc_phasewise(){
+    phase=$1
+    RTC_FLAG=0
+   
+    if [ -f $PROGRESS_REPORT_FILE ]; then 
+	start_line=$(grep -n "$phase" $PROGRESS_REPORT_FILE | cut -d : -f1 | head -1) 
+	end_line=$(grep -n "$phase" $PROGRESS_REPORT_FILE | cut -d : -f1 | tail -1)
+	
+	if [ $start_line -eq $end_line ];then
+             debug_log "$start_line = $end_line; so returning with 2"
+             RTC_FLAG=2
+	     return $RTC_FLAG
+	fi
+    
+	vusers_count=$(sed -n "${start_line},${end_line}p" $PROGRESS_REPORT_FILE | grep "Vusers" | cut -d, -f1 | egrep -o "[0-9]+.[0-9]+" | head -2 | tail -1 | cut -d. -f1)
+	rtc_vusers=$(sed -n "${start_line},${end_line}p" $PROGRESS_REPORT_FILE | grep "Vusers" | cut -d, -f1 | egrep -o "[0-9]+.[0-9]+" | cut -d. -f1 | sort -n | head -1)
+	conf_users=$(cat $CONF_FILE | grep "^SGRP" | cut -d " " -f7 | awk '{ sum+=$1} END {print sum}')
+	ramp_down_users=$(grep "RAMPDOWN DONE" $PROGRESS_REPORT_FILE | cut -d ' ' -f3)
+	rtc_string=$(grep "RTC_PHASE_0" $PROGRESS_REPORT_FILE)
+
+        debug_log "start_line=$start_line;end_line=$end_line"	
+	debug_log "VUSER_COUNT=$vusers_count;RTC_STRING=${rtc_string};rtc_vusers=$rtc_vusers;conf_users=$conf_users"
+	debug_log "ramp_down_users=$ramp_down_users;(conf+rtc)users=$((conf_users + vusers_count))"
+	
+	if [ $vusers_count -ge 10 ] && \
+           [ $vusers_count -le 110 ] && \
+	   [ $ramp_down_users -le $((conf_users + vusers_count)) ] && \
+	   [ ! -z "${rtc_string}" ]; then
+	    return $RTC_FLAG
+	else
+	    RTC_FLAG=1
+	    return $RTC_FLAG
+	fi
+    else
+        RTC_FLAG=2
+	return $RTC_FLAG
+    fi
+}
+
+
+function get_vuser(){
+    phase=$1
+    startl=$(grep -n "$phase" $PROGRESS_REPORT_FILE | cut -d : -f1 | head -1) 
+    endl=$(grep -n "$phase" $PROGRESS_REPORT_FILE | cut -d : -f1 | tail -1)
+ 
+    if [ $startl -eq $endl ]; then
+        debug_log "$start_line = $end_line; so avg_vuser=**"
+        avg_vuser="**"
+    else
+        avg_vuser=$(cat $PROGRESS_REPORT_FILE | sed -n "${startl},${endl}p" | grep "Vusers:" | egrep -o "[0-9]+.[0-9]+" | cut -d. -f1 | sort -n | tail -1)
+    fi
+            
+    debug_log "avg_vuser=$avg_vuser;startl=$startl;endl=$endl"
+    echo $avg_vuser
+}
+
+
+function get_avg_vuser_string() {
+    avg_vuser=""
+    
+    debug_log "before loop iterates avg_vuser=$avg_vuser"
+
+    for i in "$@"; do
+        if [ "$i" == "RampUp0" ]; then
+            avg_vuser+=$(get_vuser $i),
+        elif [ "$i" == "Stabilize0" ]; then
+            avg_vuser+=$(get_vuser $i),
+        elif [ "$i" == "Duration0" ]; then
+            avg_vuser+=$(get_vuser $i),
+        else 
+            avg_vuser+=$(get_vuser $i)
+        fi
+        
+        debug_log "after loop iterates for $i avg_vuser=$avg_vuser"
+    done
+
+    echo $avg_vuser
+}
+
+
+function handle_reg_001_case(){
+    get_status_rtc_phasewise Start0
+   
+    RTC_FLAG=$?
+    
+    if [ $RTC_FLAG -eq 0 ]; then 
+        log_status_and_exit_ex "PASS" "RTC is being applied for $phase phase;$vusers_count  have been found in current situation as RTC being applied"
+    elif [ $RTC_FLAG -eq 1 ]; then
+        log_status_and_exit_ex "FAIL" "It was expected that at $phase phase available Vusers present in system should be equal to 10;but actual Vusers count is $vusers_count"
+    else
+        log_status_and_exit_ex "FAIL" "RTC testcase for increase user at $phase phase has been failed due to url or NS failure"
+    fi
+}
+
+
+function handle_reg_002_case(){
+    get_status_rtc_phasewise RampUp0
+   
+    RTC_FLAG=$?
+    
+    if [ $RTC_FLAG -eq 0 ]; then 
+        log_status_and_exit_ex "PASS" "RTC is being applied for $phase phase;$vusers_count  have been found in current situation as RTC being applied"
+    elif [ $RTC_FLAG -eq 1 ]; then
+        log_status_and_exit_ex "FAIL" "It was expected that at $phase phase available Vusers present in system should be greater than 10;but actual Vuser count is $vusers_count"
+    else
+        log_status_and_exit_ex "FAIL" "RTC testcase for increase user at $phase phase has been failed due to url or NS failure"
+    fi
+}
+
+
+function handle_reg_003_case(){
+    get_status_rtc_phasewise Stabilize0
+   
+    RTC_FLAG=$?
+    
+    if [ $RTC_FLAG -eq 0 ]; then 
+        log_status_and_exit_ex "PASS" "RTC is being applied for $phase phase;$vusers_count  have been found in current situation as RTC being applied"
+    elif [ $RTC_FLAG -eq 1 ]; then
+        log_status_and_exit_ex "FAIL" "It was expected that at $phase phase available Vusers present in system should be greater than 10;but actual Vusers count is $vusers_count"
+    else
+        log_status_and_exit_ex "FAIL" "RTC testcase for increase user at $phase phase has been failed due to url or NS failure"
+    fi
+}
+
+
+function handle_reg_004_case(){
+    get_status_rtc_phasewise Duration0
+   
+    RTC_FLAG=$?
+    
+    if [ $RTC_FLAG -eq 0 ]; then 
+        log_status_and_exit_ex "PASS" "RTC is being applied for $phase phase;$vusers_count  have been found in current situation as RTC being applied"
+    elif [ $RTC_FLAG -eq 1 ]; then
+        log_status_and_exit_ex "FAIL" "It was expected that at $phase phase available Vusers present in system should be greater than 10;but actual Vusers count is $vusers_count"
+    else
+        log_status_and_exit_ex "FAIL" "RTC testcase for increase user at $phase phase has been failed due to url or NS failure"
+    fi
+}
+
+
+function handle_reg_005_case(){
+    get_status_rtc_phasewise RampDown0
+   
+    RTC_FLAG=$?
+    
+    if [ $RTC_FLAG -eq 0 ]; then 
+        log_status_and_exit_ex "PASS" "RTC is being applied for $phase phase;$vusers_count  have been found in current situation as RTC being applied"
+    elif [ $RTC_FLAG -eq 1 ]; then
+        log_status_and_exit_ex "FAIL" "It was expected that at $phase phase available Vusers present in system should be greater than 10;but actual Vusers count is $vusers_count"
+    else
+        log_status_and_exit_ex "FAIL" "RTC testcase for increase user at $phase phase has been failed due to url or NS failure"
+    fi
+}
+
+
+function handle_reg_006_case(){
+    get_avg_vuser_string RampUp0 Stabilize0 Duration0 RampDown0
+    debug_log "avg_vuser=${avg_vuser}"
+
+    if [ -z $(egrep [*]+ <<<$avg_vuser) ]; then 
+        debug_log "$start_line != $end_line as $(egrep [*]+ <<<$avg_vuser)"
+	rampup_vuser=$(echo ${avg_vuser} | cut -d, -f1)
+	stabilize_vuser=$(echo ${avg_vuser} | cut -d, -f2)
+	duration_vuser=$(echo ${avg_vuser} | cut -d, -f3)
+	rampdown_vuser=$(echo ${avg_vuser} | cut -d, -f4)
+	
+	#Validations of NVM distributions
+	
+	version=` cat $NS_WDIR/logs/TR$TEST_RUN/progress.report|head -1|cut -d ' ' -f2 `
+	if [ "$version" == "4.1.10" ];then
+	  Addedvalue=$(grep "Added" $RTC_ALL_LOG_FILE | cut -d '|' -f7|cut -d ' ' -f1|awk '{x+=$0}END{print x}')
+	  Removedvalue=$(grep "Removed" $RTC_ALL_LOG_FILE | cut -d '|' -f7|cut -d ' ' -f1|awk '{x+=$0}END{print x}')
+	  Finalvalue=$((Addedvalue-Removedvalue))
+	  ((Finalvalue+=200))
+	else
+	  Addedvalue=$(grep "Added" $RTC_ALL_LOG_FILE | cut -d' ' -f1 |awk '{x+=$0}END{print x}')
+	  Removedvalue=$(grep "Removed" $RTC_ALL_LOG_FILE | cut -d' ' -f1 |awk '{x+=$0}END{print x}')
+	  Finalvalue=$((Addedvalue-Removedvalue))
+	((Finalvalue+=200))
+	fi
+	
+	debug_log "Finalvalue=$Finalvalue"
+	
+	ramp_down_users=$(grep "RAMPDOWN DONE" $PROGRESS_REPORT_FILE | cut -d ' ' -f3)
+	debug_log "ramp_down_users=$ramp_down_users"
+	
+	rtc_phase_string_count=$(egrep "RTC_PHASE_[0-9]" $PROGRESS_REPORT_FILE | wc -l)
+	debug_log "rtc_phase_string_count=$rtc_phase_string_count"
+	
+	if [ $ramp_down_users -ne $Finalvalue ]; then
+	    log_status_and_exit_ex "FAIL" "Simple scenario RTC testcase where RTC being applied in all phases;failed as ramp_down_users=$ramp_down_users;not same as total users count=$Finalvalue after applying RTC"
+	elif [ $rtc_phase_string_count -ne 4 ]; then
+	    log_status_and_exit_ex "FAIL" "RTC acknowledgement message is not found in one of the phases where RTC being applied"
+	elif [ $rampup_vuser -lt 212 ] || \
+	     [ $stabilize_vuser -lt 192 ] || \
+	     [ $duration_vuser -lt 202 ] || \
+	     [ $rampdown_vuser -lt 209 ];then
+	    log_status_and_exit_ex "FAIL" "Mismatch in avalable VUsers present in system after RTC is applied;VUsers value found after application of RTC in ramp up, stabilzation, duration, rampdown phases are ${avg_vuser} respectively"
+	else
+	    log_status_and_exit_ex "PASS" "RTC being applied in all phases correctly;VUSers records were found as expected for each of the phases where RTC applied;Ramp down users count also met to the expected total VUsers count post application of RTC"
+	fi
+   else
+       debug_log "$start_line = $end_line as $(egrep [*]+ <<<$avg_vuser)"
+       
+       log_status_and_exit_ex "FAIL" "RTC testcase where RTC being applied in all phases failed due to possible netstorm failures or ** came in progress report; ** means there might be a network delay for which NVMs got stuck;for which data shipment failures occured" 
+   fi
+}
+
+
+main
+
+
+exit 0

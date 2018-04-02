@@ -1,0 +1,6 @@
+#!/bin/bash
+
+cmd_output=$(nsu_server_admin -i -s 10.10.30.96 -c 'ps -ef'|grep apache2)
+[ -z "${cmd_output}" ] && debug_log "apache not running"
+
+exit 0

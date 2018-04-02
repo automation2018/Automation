@@ -1,0 +1,3 @@
+CPS,Performance_cps_java_128User_OEF_010,performance,4.1.11,11,NS,TR33495,10364,10362,161,8549,8549,2671
+HPS,Performance_hps_java_128User_OEF_010,performance,4.1.11,11,NS,TR33503,12,10984,171,0,9295,2904
+THROUGHPUT,Performance_throughput_java_128User_OEF_010,performance,4.1.11,11,NS,TR33511,12,2888,924047,0,2857,916048

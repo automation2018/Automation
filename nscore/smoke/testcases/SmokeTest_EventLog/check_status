@@ -1,0 +1,211 @@
+#!/usr/bin/env bash
+
+source $NS_WDIR/lib/automation_util
+T_NAME=$(get_tname)
+EVENT_LOG="$NS_WDIR/logs/TR$T_RUN_ID/$(get_test_partition)/event.log"
+
+
+function main(){
+    case $(get_tname) in
+        "SMOKE-016-001") handle_smoke_001_case ;;
+        "SMOKE-016-002") handle_smoke_002_case ;;
+        "SMOKE-016-003") handle_smoke_003_case ;;
+        "SMOKE-016-004") handle_smoke_004_case ;;
+        "SMOKE-016-005") handle_smoke_005_case ;;
+        "SMOKE-016-006") handle_smoke_006_case ;;
+        "SMOKE-016-007") handle_smoke_007_case ;;
+        "SMOKE-016-008") handle_smoke_008_case ;;
+        "SMOKE-016-009") handle_smoke_009_case ;;
+        *) handle_unknown_case ;;
+        ?) handle_unknown_case ;;
+    esac
+}
+
+
+function handle_unknown_case(){
+    log_status_and_exit_ex "FAIL" "Testcase not found"
+}
+
+
+function get_nofilter_event_status() {
+    LOG_LINE_COUNT=$(cat ${EVENT_LOG} | awk 'END {print NR}')
+    EVENTS_TIME=$(cat ${EVENT_LOG} | cut -d "|" -f1 | sed 1d)
+    LOG_INTERVAL_FLAG=0  
+    START_LOG_TIME=00
+
+    for t in $EVENT_TIME; do
+        if [ "$t" == "00:00:00" ]; then
+            continue
+        else
+            CURRENT_LOG_TIME=$(echo $t | cut -d ":" -f3)
+            DIFF=$((CURRENT_LOG_TIME - START_LOG_TIME))
+            START_LOG_TIME=$CURRENT_LOG_TIME
+            if [ $DIFF -gt 5 ] ; then
+                LOG_INTERVAL_FLAG=1
+                break
+            fi
+        fi    
+    done
+
+    if [ $LOG_LINE_COUNT -gt 1 ] && [ $LOG_INTERVAL_FLAG -eq 0 ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+
+function handle_smoke_001_case(){
+    get_nofilter_event_status
+    FLAG=$?
+
+    if [ $FLAG -eq 0 ]; then
+        log_status_and_exit_ex "PASS" "do not filter all events will be logged condition verified"
+    else
+        log_status_and_exit_ex "FAIL" "no events got logged for conditon;do not filter all events will be logged"
+    fi
+}
+
+
+function handle_smoke_002_case(){
+    get_nofilter_event_status
+    FLAG=$?
+    
+    if [ $FLAG -eq 0 ]; then
+        log_status_and_exit_ex "PASS" "do not filter all events will be logged condition verified"
+    else
+        log_status_and_exit_ex "FAIL" "no events got logged for conditon;do not filter all events will be logged"
+    fi
+}
+
+
+function handle_smoke_003_case(){
+    get_nofilter_event_status
+    FLAG=$?
+    
+    if [ $FLAG -eq 0 ]; then
+        log_status_and_exit_ex "PASS" "do not filter all events will be logged condition verified"
+    else
+        log_status_and_exit_ex "FAIL" "no events got logged for conditon;do not filter all events will be logged"
+    fi
+}
+
+
+function handle_smoke_004_case(){
+    get_nofilter_event_status
+    FLAG=$?
+    
+    if [ $FLAG -eq 0 ]; then
+        log_status_and_exit_ex "PASS" "do not filter all events will be logged condition verified"
+    else
+        log_status_and_exit_ex "FAIL" "no events got logged for conditon;do not filter all events will be logged"
+    fi
+}
+
+
+function handle_smoke_005_case(){
+    LOG_LINE_COUNT=$(cat ${EVENT_LOG} | awk 'END {print NR}')
+    state_changed_events=$(cat ${EVENT_LOG} | cut -d '|' -f1,9 | sed '1d; $d' | grep -v "Test debug" | cut -d . -f1)
+    flag=0
+
+    for line in "${state_changed_events}"; do
+        isPresent=$(grep "2xx" <<<$line)
+        debug_log "flag=$flag;isPresent=$isPresent"
+        if [ ! -z $isPresent ]; then
+            flag=1
+            debug_log "flag=$flag;isPresent=$isPresent"
+            log_status_and_exit_ex "FAIL" "it was expected 2xx events should not be logged as per state change; but some of 2xx evemts  are found in event file"
+        fi 
+    done
+
+    debug_log "flag=$flag"
+    if [ $flag -eq 0 ]; then
+        log_status_and_exit_ex "PASS" "log events as per event definition file with log event as per state change mode(1) tested"
+    fi
+}
+
+
+# Previously we were controlling timeout events with G_IDLE_MSECS keyword
+# Some times NS receives early response from NO overtaking the keyword controls
+# To handle this issue We have created a service and provided SVC_TIME 2 0
+function handle_smoke_006_case(){
+    events_asper_count=$(cut -d "|" -f9 ${EVENT_LOG} | egrep "T.O")
+    
+    debug_log "logged_events are=${events_asper_count}"
+    if [ ! -z "${events_asper_count}" ]; then
+        log_status_and_exit_ex "PASS" "Expected timeout events has been logged ;as per event definition file with log event as per events count"
+    else
+        log_status_and_exit_ex "FAIL" "no expected timeout events has been logged as; per event definition file with log event as per event counts mode(2)"
+    fi
+}
+
+
+function handle_smoke_007_case(){
+    events_asper_occurence=$(cut -d "|" -f9 ${EVENT_LOG} | sed '1d')
+    flag=0
+
+    for line in "${events_asper_occurence}"; do
+        isPresent=$(grep "CVFail" <<<$line)
+        if [ -z "${isPresent}" ]; then
+            debug_log "flag=$flag;isPresent=$isPresent"
+            flag=1
+            log_status_and_exit_ex "FAIL" "expected CvFail events is not logged; as per events definition file for events to be logged as per occurence time"
+        fi
+    done
+ 
+    if [ $flag -eq 0 ]; then
+        EVENTS_DAT=$(cut -d ',' -f 9 $NS_WDIR/logs/tsr/${TEST_CYCLE_NUM}/${TSR_NUM}/SmokeTest_EventLog_results.csv |tail -1| awk '{print $2}')
+        event_filter=$(cut -d '|' -f 2 $NS_WDIR/events/$EVENTS_DAT)
+        logging_interval=$(($(cut -d '|' -f 5 /home/netstorm/work/events/${EVENTS_DAT})/1000))
+        debug_log "EVENTS_DAT=$EVENTS_DAT"
+        debug_log "Logging interval found is: $logging_interval"
+        log_time_found=($(grep "$event_filter" ${EVENT_LOG} | cut -d '|' -f 1))
+        log_count=${#log_time_found[@]}
+        debug_log "log_time_found=$log_time_found"
+        debug_log "log_count=$log_count"
+        for ((i=0; i<$log_count-1; i++));do
+            expected_log_time=$(echo $(date '+%H:%M:%S' --date="${log_time_found[i]} IST + ${logging_interval} seconds"))
+            expected_log_time_new=$(echo $expected_log_time |awk -F ':' '{print $3}')
+            debug_log "Expected time of next log $expected_log_time_new"
+            log_time_found_new=$(echo ${log_time_found[$(($i+1))]}| awk -F ':' '{print $3}')
+            debug_log "Next log time found ${log_time_found_new}"
+            if [ "$expected_log_time_new" != "${log_time_found_new}" ];then 
+                flag=1 
+                log_status_and_exit_ex "FAIL" "CvFail events for logging on given time testcase failed because the logs were not recorded as per expected interval"
+            fi
+        done
+    fi
+    if [ $flag -eq 0 ];then
+        log_status_and_exit_ex "PASS" "all CvFail events has been logged;for logging events as per event definition file and event to be logged as per event occurence time"
+    fi
+}
+
+
+function handle_smoke_008_case(){
+    LOG_LINE_COUNT=$(cat ${EVENT_LOG} | awk 'END {print NR}')
+    
+    if [ $LOG_LINE_COUNT -gt 1 ]; then
+        log_status_and_exit_ex "PASS" "log events as per event definition file with no flter(0) mode tested"
+    else
+        log_status_and_exit_ex "FAIL" "no events being logged in case of;log events as per event definition file with no flter(0) mode"
+    fi
+}
+
+
+function handle_smoke_009_case(){
+    LOG_LINE_COUNT=$(cat ${EVENT_LOG} | awk 'END {print NR}')
+    
+    #there should not be any events logged in event.log file
+    #hence only file header should be printed 
+    #thats why validating case with file line count as 1 
+    if [ $LOG_LINE_COUNT -eq 1 ]; then
+        log_status_and_exit_ex "PASS" "no events being logged for filter all events;no events will be logged configuration setting"
+    else
+        log_status_and_exit_ex "FAIL" "some events has been logged for configuration;filter all events;no events will be logged"
+    fi
+}
+
+
+main
+
+exit 0

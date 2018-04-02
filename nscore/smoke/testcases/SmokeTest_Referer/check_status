@@ -1,0 +1,621 @@
+#!/bin/bash
+
+source $NS_WDIR/lib/automation_util
+T_NAME=$(get_tname)
+
+F_S_1_P=${T_ID_REQ_PATH}/url_req_0_0_0_0_0_0_0_0_0.dat
+F_S_2_P=${T_ID_REQ_PATH}/url_req_0_0_0_1_0_0_0_1_0.dat
+F_S_3_P=${T_ID_REQ_PATH}/url_req_0_0_0_2_0_0_0_2_0.dat
+F_S_4_P=${T_ID_REQ_PATH}/url_req_0_0_0_3_0_0_0_3_0.dat
+F_S_5_P=${T_ID_REQ_PATH}/url_req_0_0_0_4_0_0_0_4_0.dat
+S_S_1_P=${T_ID_REQ_PATH}/url_req_0_1_1_0_0_0_0_0_0.dat
+S_S_2_P=${T_ID_REQ_PATH}/url_req_0_1_1_1_0_0_0_1_0.dat
+S_S_3_P=${T_ID_REQ_PATH}/url_req_0_1_1_2_0_0_0_2_0.dat
+S_S_4_P=${T_ID_REQ_PATH}/url_req_0_1_1_3_0_0_0_3_0.dat
+S_S_5_P=${T_ID_REQ_PATH}/url_req_0_1_1_4_0_0_0_4_0.dat
+
+
+function main(){
+    case $(get_tname) in
+        "SMOKE-034-001") validate_Referer_Case_001 ;;
+        "SMOKE-034-002") validate_Referer_Case_002 ;;
+        "SMOKE-034-003") validate_Referer_Case_003 ;;
+        "SMOKE-034-004") validate_Referer_Case_004 ;;
+        "SMOKE-034-005") validate_Referer_Case_005 ;;
+        "SMOKE-034-006") validate_Referer_Case_006 ;;
+        "SMOKE-034-007") validate_Referer_Case_007 ;;
+        "SMOKE-034-008") validate_Referer_Case_008 ;;
+        "SMOKE-034-009") validate_Referer_Case_009 ;;
+        "SMOKE-034-010") validate_Referer_Case_010 ;;
+        "SMOKE-034-011") validate_Referer_Case_011 ;;
+        "SMOKE-034-012") validate_Referer_Case_012 ;;
+        "SMOKE-034-013") validate_Referer_Case_013 ;;
+        "SMOKE-034-014") validate_Referer_Case_014 ;;
+        "SMOKE-034-015") validate_Referer_Case_015 ;;
+        *) handle_unknown_case ;;
+         ?) handle_unknown_case ;;
+    esac
+}
+
+function handle_unknown_case(){
+    log_status_and_exit_ex "FAIL" "testcase not found"
+}
+
+function validate_Referer_Case_001(){
+    debug_log "Referer case"
+    referer_Display_On_All_Request_Page=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_*)
+    if [ -z "${referer_Display_On_All_Request_Page}" ]; then
+        log_status_and_exit_ex "PASS" "Referer not set on request page becasuse referer mode is disable"
+    else
+        log_status_and_exit_ex "FAIL" "Referer set on request page while referer mode is disable"
+    fi
+}
+
+#1st_Page_All_Inline(1_P_A_I)
+#1st_Page_All_MainUrl(1_P_A_M)
+#1st_Session_1st_Page_All_Inline(F_S_1_P_A_I)
+
+function validate_Referer_Case_002(){
+    debug_log "Referer case"
+    referer_1_P_A_I=$(egrep '^Referer' ${F_S_1_P}| grep  "http://10.10.30.96/http_referer/Redirection1_response.html")
+    referer_2_P_1_M=$(egrep '^Referer' ${F_S_2_P}| grep  "http://10.10.30.96/http_referer/Redirection1_response.html")
+    referer_2_P_A_I=$(egrep '^Referer' ${F_S_2_P}| grep  "http://10.10.30.96/cgi-bin/login?userSession")
+    referer_3_P_A_M=$(egrep '^Referer' ${F_S_3_P}| grep  "http://10.10.30.96/cgi-bin/login?userSession")
+    referer_3_P_A_I=$(egrep '^Referer' ${F_S_3_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+    referer_4_P_1_M=$(egrep '^Referer' ${F_S_4_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+    referer_4_P_A_I=$(egrep '^Referer' ${F_S_4_P}| grep "http://10.10.30.96/cgi-bin/findflight?depart=Acapulco&departDate")
+    referer_5_P_1_M=$(egrep '^Referer' ${F_S_5_P}| grep "http://10.10.30.96/cgi-bin/findflight?depart=Acapulco&departDate")
+    referer_5_P_A_I=$(egrep '^Referer' ${F_S_5_P}| grep "http://10.10.30.96/cgi-bin/welcome")
+    debug_log "referer_1_P_A_I: $referer_1_P_A_I"
+    debug_log "referer_2_P_1_M: $referer_2_P_1_M"
+    debug_log "referer_2_P_A_I: $referer_2_P_A_I"
+    debug_log "referer_3_P_A_M: $referer_3_P_A_M"
+    debug_log "referer_3_P_A_I: $referer_3_P_A_I"
+    debug_log "referer_4_P_1_M: $referer_4_P_1_M"
+    debug_log "referer_4_P_A_I: $referer_4_P_A_I"
+    debug_log "referer_5_P_1_M: $referer_5_P_1_M"
+    debug_log "referer_5_P_A_I: $referer_5_P_A_I"
+    if [ ! -z "${referer_1_P_A_I}" ]; then
+        if [ ! -z "${referer_2_P_1_M}" ] && [ ! -z "${referer_2_P_A_I}" ]; then
+            if [ ! -z "${referer_3_P_A_M}" ] && [ ! -z "${referer_3_P_A_I}" ]; then
+                if [ ! -z "${referer_4_P_1_M}" ] && [ ! -z "${referer_4_P_A_I}" ]; then
+                    if [ ! -z "${referer_5_P_1_M}" ] && [ ! -z "${referer_5_P_A_I}" ]; then
+                        log_status_and_exit_ex "PASS" "Referer on each page and change referer on redirect for browser behaviour "
+                    else
+                        log_status_and_exit_ex "FAIL" "Referer is not set on 1st mainUrl and All InlineUrl page  on 5th Page"
+                    fi
+                else
+                    log_status_and_exit_ex "FAIL" "Referer is not set on 1st mainUrl and All InlineUrl page on 4th page"
+                fi
+            else
+                log_status_and_exit_ex "FAIL" "Referer is not set on All MainUrl and All InlineUrl page on 3rd page"
+            fi
+        else
+            log_status_and_exit_ex "FAIL" "Referer is not set on 1st MainUrl and All InlineUrl page on 2nd page "
+        fi
+    else
+        log_status_and_exit_ex "FAIL" "Referer is not set on  All InlineUrl page on 1st page"
+    fi
+    }
+
+
+function validate_Referer_Case_003(){
+     referer_1_P_2_M=$(egrep '^Referer' ${F_S_1_P}| grep "http://10.10.30.96/http_referer/Redirection1.html") 
+     referer_1_P_3_M=$(egrep '^Referer' ${F_S_1_P}| grep "http://10.10.30.96/http_referer/Redirection2.html")
+     referer_1_P_4_M=$(egrep '^Referer' ${F_S_1_P}| grep "http://10.10.30.96/http_referer/Redirection3.html")
+     referer_1_P_A_I=$(egrep '^Referer' ${F_S_1_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+     referer_2_P_1_M=$(egrep '^Referer' ${F_S_2_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+     referer_2_P_A_I=$(egrep '^Referer' ${F_S_2_P}| grep "http://10.10.30.96/cgi-bin/login?userSession")
+     referer_3_P_1_M=$(egrep '^Referer' ${F_S_3_P}| grep "http://10.10.30.96/cgi-bin/login?userSession")
+     referer_3_P_2_M=$(egrep '^Referer' ${F_S_3_P}| grep "http://10.10.30.96/http_referer/Redirection3.html")
+     referer_3_P_3_M=$(egrep '^Referer' ${F_S_3_P}| grep "http://10.10.30.96/http_referer/Redirection4.html")
+     referer_3_P_A_I=$(egrep '^Referer' ${F_S_3_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+     referer_4_P_1_M=$(egrep '^Referer' ${F_S_4_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+     referer_4_P_A_I=$(egrep '^Referer' ${F_S_4_P}| grep "http://10.10.30.96/cgi-bin/findflight?depart=Acapulco&departDate")
+     referer_5_P_1_M=$(egrep '^Referer' ${F_S_5_P}| grep "http://10.10.30.96/cgi-bin/findflight?depart=Acapulco&departDate")
+     referer_5_P_A_I=$(egrep '^Referer' ${F_S_5_P}| grep "http://10.10.30.96/cgi-bin/welcome")
+      if [ ! -z "${referer_1_P_2_M}" ] && [ ! -z "${referer_1_P_3_M}" ] && [ ! -z "${referer_1_P_4_M}" ] && [ ! -z "${referer_1_P_A_I}" ]; then
+          if [ ! -z "${referer_2_P_1_M}" ] && [ ! -z "${referer_2_P_A_I}" ]; then
+              if [ ! -z "${referer_3_P_1_M}" ] && [ ! -z "${referer_3_P_2_M}" ] && [ ! -z "${referer_3_P_3_M}" ] && [ ! -z "${referer_3_P_A_I}" ]; then
+                  if [ ! -z "${referer_4_P_1_M}" ] && [ ! -z "${referer_4_P_A_I}" ]; then
+                      if [ ! -z "${referer_5_P_1_M}" ] && [ ! -z "${referer_5_P_A_I}" ]; then
+                          log_status_and_exit_ex "PASS" "Referer on each page and change referer on redirect for NS behaviour "
+                      else
+                          log_status_and_exit_ex "FAIL" "Referer is not set on 1st mainUrl and All InlineUrl page  on 5th Page"
+                      fi
+                  else
+                      log_status_and_exit_ex "FAIL" "Referer is not set on 1st mainUrl and All InlineUrl page  on 4th Page"
+                  fi
+              else
+                  log_status_and_exit_ex "FAIL" "Referer is not set on All mainUrl and All InlineUrl page  on 3rd Page"
+              fi
+          else
+              log_status_and_exit_ex "FAIL" "Referer is not set on 1st mainUrl and All InlineUrl page  on 2nd Page"
+          fi
+      else
+          log_status_and_exit_ex "FAIL" "Referer is not set on All  mainUrl and All InlineUrl page on 1st Page"
+      fi
+  }
+
+function validate_Referer_Case_004(){
+     referer_1_P_A_I=$(egrep '^Referer' ${F_S_1_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+     referer_2_P_1_M=$(egrep '^Referer' ${F_S_2_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+     referer_2_P_A_I=$(egrep '^Referer' ${F_S_2_P}| grep "http://10.10.30.96/cgi-bin/login?userSession")
+     referer_3_P_A_M=$(egrep '^Referer' ${F_S_3_P}| grep "http://10.10.30.96/cgi-bin/login?userSession")
+     referer_3_P_A_I=$(egrep '^Referer' ${F_S_3_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+     referer_4_P_1_M=$(egrep '^Referer' ${F_S_4_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+     referer_4_P_A_I=$(egrep '^Referer' ${F_S_4_P}| grep "http://10.10.30.96/cgi-bin/findflight?depart=Acapulco&departDate")
+     referer_5_P_1_M=$(egrep '^Referer' ${F_S_5_P}| grep "http://10.10.30.96/cgi-bin/findflight?depart=Acapulco&departDate")
+     referer_5_P_A_I=$(egrep '^Referer' ${F_S_5_P}| grep "http://10.10.30.96/cgi-bin/welcome")
+     referer_S_S_1_P_A_I=$(egrep '^Referer' ${S_S_1_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+     referer_S_S_2_P_1_M=$(egrep '^Referer' ${S_S_2_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+     referer_S_S_2_P_A_I=$(egrep '^Referer' ${S_S_2_P} | grep "http://10.10.30.96/cgi-bin/login?userSession")
+     referer_S_S_3_P_A_M=$(egrep '^Referer' ${S_S_3_P}| grep "http://10.10.30.96/cgi-bin/login?userSession")
+     referer_S_S_3_P_A_I=$(egrep '^Referer' ${S_S_3_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+     referer_S_S_4_P_1_M=$(egrep '^Referer' ${S_S_4_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+     referer_S_S_4_P_A_I=$(egrep '^Referer' ${S_S_4_P}| grep "http://10.10.30.96/cgi-bin/findflight?depart=Acapulco&depart")
+     referer_S_S_5_P_1_M=$(egrep '^Referer' ${S_S_5_P}| grep "http://10.10.30.96/cgi-bin/findflight?depart=Acapulco&depart")
+     referer_S_S_5_P_A_I=$(egrep '^Referer' ${S_S_5_P}| grep "http://10.10.30.96/cgi-bin/welcome")
+     if [ ! -z "${referer_1_P_A_I}" ] && [ ! -z "${referer_S_S_1_P_A_I}" ]; then
+         if [ ! -z "${referer_2_P_1_M}" ] && [ ! -z "${referer_S_S_2_P_1_M}" ]; then
+             if [ ! -z "${referer_2_P_A_I}" ] && [ ! -z "${referer_S_S_2_P_A_I}" ]; then
+                 if [ ! -z "${referer_3_P_A_M}" ] && [ ! -z "${referer_S_S_3_P_A_M}" ]; then
+                     if  [ ! -z "${referer_3_P_A_I}" ] && [ ! -z "${referer_S_S_3_P_A_I}" ]; then
+                         if [ ! -z "${referer_4_P_1_M}" ] && [ ! -z "${referer_S_S_4_P_1_M}" ]; then
+                             if [ ! -z "${referer_4_P_A_I}" ] && [ ! -z "${referer_S_S_4_P_A_I}" ]; then
+                                 if [ ! -z "${referer_5_P_1_M}" ] && [ ! -z "${referer_S_S_5_P_1_M}" ]; then
+                                     if [ ! -z "${referer_5_P_A_I}" ] && [ ! -z "${referer_S_S_5_P_A_I}" ]; then
+                                    log_status_and_exit_ex "PASS" "Referer on each page in both Session and browser  behaviour"
+                                     fi
+                                 else
+                                     log_status_and_exit_ex "FAIL" "Referer is not set in 1st mainUrl page on 5th Page"
+                                 fi
+                             else
+                                 log_status_and_exit_ex "FAIL" "Referer is not set in All inlineUrl on 4th page"
+                             fi
+                         else
+                             log_status_and_exit_ex "FAIL" "Referer is not set in 1st mainUrl on 4th page"
+                         fi
+                     else
+                         log_status_and_exit_ex "FAIL" "Referer is not set in All inlineUrl on 3rd page"
+                     fi
+                 else
+                     log_status_and_exit_ex "FAIL" "Referer is not set in All mainUrl on 3rd page"
+                 fi
+             else
+                 log_status_and_exit_ex "FAIL" "Referer is not set in All InlineUrl on 2nd page"
+             fi
+         else
+             log_status_and_exit_ex "FAIL" "Referer is not set in All mainUrl on 2nd page "
+         fi
+     else
+         log_status_and_exit_ex "FAIL" "Referer is not set on 1st Session and 2nd Session in All InlineUrl on 1st page" 
+     fi
+ }
+
+function validate_Referer_Case_005(){
+    referer_Display_on_All_Request_page=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_*)
+    if [ -z "${referer_Display_on_All_Request_page}" ]; then
+        log_status_and_exit_ex "PASS" "Referer not set on request page becasuse referer mode is disable "
+    else
+        log_status_and_exit_ex "FAIL" "Referer set on request page while referer mode is disable"
+    fi
+    }
+
+function validate_Referer_Case_006(){
+     referer_1_P_A_I=$(egrep '^Referer' ${F_S_1_P}| grep "http://10.10.30.96/tours/index.html")
+     referer_2_P_1_M=$(egrep '^Referer' ${F_S_2_P}| grep "http://10.10.30.96/tours/index.html")
+     referer_2_P_A_I=$(egrep '^Referer' ${F_S_2_P}| grep "http://10.10.30.96/cgi-bin/login?userSession")
+     referer_3_P_A_M=$(egrep '^Referer' ${F_S_3_P}| grep "http://10.10.30.96/cgi-bin/login?userSession")
+     referer_4_P_A_I=$(egrep '^Referer' ${F_S_4_P}| grep "http://10.10.30.96/cgi-bin/findflight?depart=Acapulco&departDate")
+     referer_5_P_1_M=$(egrep '^Referer' ${F_S_5_P}| grep "http://10.10.30.96/cgi-bin/findflight?depart=Acapulco&departDate")
+     referer_5_P_A_I=$(egrep '^Referer' ${F_S_5_P}| grep "http://10.10.30.96/cgi-bin/welcome")
+    
+     if [ ! -z "${referer_1_P_A_I}" ]; then
+         if [ ! -z "${referer_2_P_1_M}" ] &&  [ ! -z "${referer_2_P_A_I}" ]; then
+             if [ ! -z "${referer_3_P_A_M}" ]; then
+                 if [ ! -z "${referer_4_P_A_I}" ]; then
+                     if [ ! -z "${referer_5_P_1_M}" ] && [ ! -z "${referer_5_P_A_I}" ]; then
+                         log_status_and_exit_ex "PASS" "Referer on each pag and change referer on redirect for browser behaviour"
+                     else
+                         log_status_and_exit_ex "FAIL" "referer set on 1st mainurl and All InlineUrl in 5th page"
+                     fi
+                 else
+                     log_status_and_exit_ex "FAIL" "Referer is not set on  1st mainUrl on 4th Page"
+                 fi
+             else
+                 log_status_and_exit_ex "FAIL" "Referer is not set on All mainUrl on 3rd Page"
+             fi
+         else
+             log_status_and_exit_ex "FAIL" "Referer is not set on  1st MainUrl and All InlineUrl on 2nd Page"
+         fi
+     else
+         log_status_and_exit_ex "FAIL" "Referer is not set on All InlineUrl on 1st Page"
+     fi
+}
+
+function validate_Referer_Case_007(){
+    referer_F_S_1_P_A_I=$(egrep '^Referer' ${F_S_1_P}| grep "http://10.10.30.96/tours/index.html")
+    referer_F_S_2_P_1_M=$(egrep '^Referer' ${F_S_2_P}| grep "http://10.10.30.96/tours/index.html")
+    referer_F_S_2_P_A_I=$(egrep '^Referer' ${F_S_2_P}| grep "http://10.10.30.96/cgi-bin/login?userSession")
+    referer_F_S_3_P_A_M=$(egrep '^Referer' ${F_S_3_P}| grep "http://10.10.30.96/cgi-bin/login?userSession")
+    referer_F_S_4_P_A_I=$(egrep '^Referer' ${F_S_4_P}| grep "http://10.10.30.96/cgi-bin/findflight?depart=Acapulco&depart")
+    referer_F_S_5_P_1_M=$(egrep '^Referer' ${F_S_5_P}| grep "http://10.10.30.96/cgi-bin/findflight?depart=Acapulco&depart")
+    referer_F_S_5_P_A_I=$(egrep '^Referer' ${F_S_5_P}| grep "http://10.10.30.96/cgi-bin/welcome")
+    referer_S_S_1_P_A_I=$(egrep '^Referer' ${S_S_1_P}| grep "http://10.10.30.96/tours/index.html")
+    referer_S_S_2_P_1_M=$(egrep '^Referer' ${S_S_2_P}| grep "http://10.10.30.96/tours/index.html")
+    referer_S_S_2_P_A_I=$(egrep '^Referer' ${S_S_2_P}| grep "http://10.10.30.96/cgi-bin/login?userSession")
+    referer_S_S_3_P_A_M=$(egrep '^Referer' ${S_S_3_P}| grep "http://10.10.30.96/cgi-bin/login?userSession")
+    referer_S_S_4_P_A_I=$(egrep '^Referer' ${S_S_4_P}| grep "http://10.10.30.96/cgi-bin/findflight?depart=Acapulco&depart")
+    referer_S_S_5_P_1_M=$(egrep '^Referer' ${S_S_5_P}| grep "http://10.10.30.96/cgi-bin/findflight?depart=Acapulco&depart")
+    referer_S_S_5_P_A_I=$(egrep '^Referer' ${S_S_5_P}| grep "http://10.10.30.96/cgi-bin/welcome")
+
+    if [ ! -z "${referer_F_S_1_P_A_I}" ] && [ ! -z "${referer_S_S_1_P_A_I}" ];then
+        if [ ! -z "${referer_F_S_2_P_1_M}" ] && [ ! -z "${referer_S_S_2_P_1_M}" ]; then
+            if [ ! -z "${referer_F_S_2_P_A_I}" ] && [ ! -z "${referer_S_S_2_P_A_I}" ]; then
+                if [ ! -z "${referer_F_S_3_P_A_M}" ] && [ ! -z "${referer_S_S_3_P_A_M}" ]; then
+                    if [ ! -z "${referer_F_S_4_P_A_I}" ] && [ ! -z "${referer_S_S_4_P_A_I}" ]; then
+                        if [ ! -z "${referer_F_S_5_P_1_M}" ] && [ ! -z "${referer_S_S_5_P_1_M}" ]; then
+                            if [ ! -z "${referer_F_S_5_P_A_I}" ] && [ ! -z "${referer_S_S_5_P_A_I}" ]; then
+                                log_status_and_exit_ex "PASS" "Referer set on each page in both session in  browser  behaviour"
+                            else
+                                log_status_and_exit_ex "FAIL" "Referer is not set in All InlineUrl page on 5th Page"
+                            fi
+                        else
+                            log_status_and_exit_ex "FAIL"  "Referer is not set in 1st mainUrl page on 5th Page"
+                        fi
+                    else
+                        log_status_and_exit_ex "FAIL" "Referer is not set on in All InlineUrl page on 4th Page"
+                    fi
+                else
+                    log_status_and_exit_ex "FAIL" "Referer is not set in All MainUrl page on 3rd Page"
+                fi
+            else
+                log_status_and_exit_ex "FAIL" "Referer is not set in All InlineUrl page on 2nd Page"
+            fi
+        else
+            log_status_and_exit_ex "FAIL" "Referer is not set in 1st mainUrl page on 2nd Page"
+        fi
+    else
+        log_status_and_exit_ex "FAIL" "Referer is not set in All InlineUrl page on 1st Page"
+    fi
+}
+
+function validate_Referer_Case_008(){
+    debug_log "Referer case"
+    referer_F_S_1_P_A_I=$(egrep '^Referer' ${F_S_1_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+    referer_F_S_2_P_1_M=$(egrep '^Referer' ${F_S_2_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+    referer_F_S_2_P_A_I=$(egrep '^Referer' ${F_S_2_P}| grep "http://10.10.30.96/cgi-bin/login?userSession")
+    referer_F_S_3_P_A_M=$(egrep '^Referer' ${F_S_3_P}| grep "http://10.10.30.96/cgi-bin/login?userSession")
+    referer_F_S_3_P_A_I=$(egrep '^Referer' ${F_S_3_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+    referer_F_S_4_P_1_M=$(egrep '^Referer' ${F_S_4_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+    referer_F_S_4_P_A_I=$(egrep '^Referer' ${F_S_4_P}| grep "http://10.10.30.96/cgi-bin/findflight?depart=Acapulco&depart")
+    referer_F_S_5_P_1_M=$(egrep '^Referer' ${F_S_5_P}| grep "http://10.10.30.96/cgi-bin/findflight?depart=Acapulco&depart")
+    referer_F_S_5_P_A_I=$(egrep '^Referer' ${F_S_5_P}| grep "http://10.10.30.96/cgi-bin/welcome")
+    referer_S_S_1_P_A_I=$(egrep '^Referer' ${S_S_1_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+    referer_S_S_2_P_1_M=$(egrep '^Referer' ${S_S_2_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+    referer_S_S_2_P_A_I=$(egrep '^Referer' ${S_S_2_P}| grep "http://10.10.30.96/cgi-bin/login?userSession")
+    referer_S_S_3_P_A_M=$(egrep '^Referer' ${S_S_3_P}| grep "http://10.10.30.96/cgi-bin/login?userSession")
+    referer_S_S_3_P_A_I=$(egrep '^Referer' ${S_S_3_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+    referer_S_S_4_P_1_M=$(egrep '^Referer' ${S_S_4_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+    referer_S_S_4_P_A_I=$(egrep '^Referer' ${S_S_4_P}| grep "http://10.10.30.96/cgi-bin/findflight?depart=Acapulco&depart")
+    referer_S_S_5_P_1_M=$(egrep '^Referer' ${S_S_5_P}| grep "http://10.10.30.96/cgi-bin/findflight?depart=Acapulco&depart")
+    referer_S_S_5_P_A_I=$(egrep '^Referer' ${S_S_5_P}| grep "http://10.10.30.96/cgi-bin/welcome")
+   
+    if [ ! -z "${referer_F_S_1_P_A_I}" ] && [ ! -z "${referer_S_S_1_P_A_I}" ]; then
+        if [ ! -z "${referer_F_S_2_P_1_M}" ] && [ ! -z "${referer_S_S_2_P_1_M}" ]; then
+            if [ ! -z "${referer_F_S_2_P_A_I}" ] && [ ! -z "${referer_S_S_2_P_A_I}" ]; then
+                if [ ! -z "${referer_F_S_3_P_A_M}" ] && [ ! -z "${referer_S_S_3_P_A_M}" ]; then
+                    if [ ! -z "${referer_F_S_3_P_A_I}" ] && [ ! -z "${referer_S_S_3_P_A_I}" ]; then
+                        if [ ! -z "${referer_F_S_4_P_1_M}" ] && [ ! -z "${referer_S_S_4_P_1_M}" ]; then
+                            if [ ! -z "${referer_F_S_4_P_A_I}" ] && [ ! -z "${referer_S_S_4_P_A_I}" ]; then
+                                if [ ! -z "${referer_F_S_5_P_1_M}" ] && [ ! -z "${referer_S_S_5_P_1_M}" ]; then
+                                    if [ ! -z "${referer_F_S_5_P_A_I}" ] && [ ! -z "${referer_S_S_5_P_A_I}" ]; then
+                                        log_status_and_exit_ex "PASS" "Referer on each page in both Session and browser behaviour"
+                                    else
+                                        log_status_and_exit_ex "FAIL" "Referer is not set in All InlineUrl page on 5th Page"
+                                    fi
+                                else
+                                    log_status_and_exit_ex "FAIL" "Referer is not set in 1st MainUrl page on 5th Page"
+                                fi
+                            else
+                                log_status_and_exit_ex "FAIL" "Referer is not set in All InlineUrl page on 4th Page"
+                            fi
+                        else
+                            log_status_and_exit_ex "FAIL" "Referer set is not set in 1st MainUrl on 4th Page"
+                        fi
+                    else
+                        log_status_and_exit_ex "FAIL" "Referer set is not set in All InlineUrl in 3rd Page"
+                    fi
+                else
+                    log_status_and_exit_ex "FAIL" "Referer is not set in All MainUrl page on 3rd Page"
+                fi
+            else
+                log_status_and_exit_ex "FAIL" "Referer is not set in All InlineUrl page on 2nd Page"
+            fi
+        else
+            log_status_and_exit_ex "FAIL" "Referer is not set in 1st MainUrl page on 2nd Page"
+        fi
+    else
+        log_status_and_exit_ex "FAIL" "Referer is not set in All InlineUrl page on 1st Page" 
+    fi
+}
+
+function validate_Referer_Case_009(){
+    referer_F_S_1_P_1_M=$(egrep '^Referer' ${F_S_1_P}| grep "http://10.10.30.96/http_referer/Redirection1.html")
+    referer_F_S_1_P_2_M=$(egrep '^Referer' ${F_S_1_P}| grep "http://10.10.30.96/http_referer/Redirection2.html")
+    referer_F_S_1_P_3_M=$(egrep '^Referer' ${F_S_1_P}| grep "http://10.10.30.96/http_referer/Redirection3.html")
+    referer_F_S_1_P_4_M=$(egrep '^Referer' ${F_S_1_P}| grep "http://10.10.30.96/http_referer/Redirection4.html")
+    referer_F_S_1_P_A_I=$(egrep '^Referer' ${F_S_1_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+    referer_F_S_2_P_1_M=$(egrep '^Referer' ${F_S_2_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+    referer_F_S_2_P_A_I=$(egrep '^Referer' ${F_S_2_P}| grep "http://10.10.30.96/cgi-bin/login?userSession")
+    referer_F_S_3_P_1_M=$(egrep '^Referer' ${F_S_3_P}| grep "http://10.10.30.96/cgi-bin/login?userSession")
+    referer_F_S_3_P_2_M=$(egrep '^Referer' ${F_S_3_P}| grep "http://10.10.30.96/http_referer/Redirection3.html")
+    referer_F_S_3_P_3_M=$(egrep '^Referer' ${F_S_3_P}| grep "http://10.10.30.96/http_referer/Redirection4.html")
+    referer_F_S_3_P_A_I=$(egrep '^Referer' ${F_S_3_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+    referer_F_S_4_P_1_M=$(egrep '^Referer' ${F_S_4_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+    referer_F_S_4_P_A_I=$(egrep '^Referer' ${F_S_4_P}| grep "http://10.10.30.96/cgi-bin/findflight?depart=Acapulco&depart")
+    referer_F_S_5_P_1_M=$(egrep '^Referer' ${F_S_5_P}| grep "http://10.10.30.96/cgi-bin/findflight?depart=Acapulco&depart")
+    referer_F_S_5_P_A_I=$(egrep '^Referer' ${F_S_5_P}| grep "http://10.10.30.96/cgi-bin/welcome")
+    referer_S_S_1_P_1_M=$(egrep '^Referer' ${S_S_1_P}| grep "http://10.10.30.96/http_referer/Redirection1.html")
+    referer_S_S_1_P_2_M=$(egrep '^Referer' ${S_S_1_P}| grep "http://10.10.30.96/http_referer/Redirection2.html")
+    referer_S_S_1_P_3_M=$(egrep '^Referer' ${S_S_1_P}| grep "http://10.10.30.96/http_referer/Redirection3.html")
+    referer_S_S_1_P_4_M=$(egrep '^Referer' ${S_S_1_P}| grep "http://10.10.30.96/http_referer/Redirection4.html")
+    referer_S_S_1_P_A_I=$(egrep '^Referer' ${S_S_1_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+    referer_S_S_2_P_1_M=$(egrep '^Referer' ${S_S_2_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+    referer_S_S_2_P_A_I=$(egrep '^Referer' ${S_S_2_P}| grep "http://10.10.30.96/cgi-bin/login?userSession")
+    referer_S_S_3_P_1_M=$(egrep '^Referer' ${S_S_2_P}| grep "http://10.10.30.96/cgi-bin/login?userSession")
+    referer_S_S_3_P_2_M=$(egrep '^Referer' ${S_S_3_P}| grep "http://10.10.30.96/http_referer/Redirection3.html")
+    referer_S_S_3_P_3_M=$(egrep '^Referer' ${S_S_3_P}| grep "http://10.10.30.96/http_referer/Redirection4.html")
+    referer_S_S_3_P_A_I=$(egrep '^Referer' ${S_S_3_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+    referer_S_S_4_P_1_M=$(egrep '^Referer' ${S_S_4_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+    referer_S_S_4_P_A_I=$(egrep '^Referer' ${S_S_4_P}| grep "http://10.10.30.96/cgi-bin/findflight?depart=Acapulco&depart")
+    referer_S_S_5_P_1_M=$(egrep '^Referer' ${S_S_5_P}| grep "http://10.10.30.96/cgi-bin/findflight?depart=Acapulco&depart")
+    referer_S_S_5_P_A_I=$(egrep '^Referer' ${S_S_5_P}| grep "http://10.10.30.96/cgi-bin/welcome")
+    if [ ! -z "${referer_F_S_1_P_1_M}" ] && [ ! -z "${referer_S_S_1_P_1_M}" ] && [ ! -z "${referer_F_S_1_P_2_M}" ] && [ ! -z "${refer_S_S_1_P_2_M}" ] && [ ! -z "${referer_F_S_1_P_3_M}" ] && [ ! -z "${referer_S_S_1_P_3_M}" ] && [ ! -z "${referer_F_S_1_P_4_M}" ] && [ ! -z "${referer_S_S_1_P_4_M}" ] && [ ! -z "${referer_F_S_1_P_A_I}" ] && [ ! -z "${referer_S_S_1_P_A_I}" ]; then
+        if [ ! -z "${referer_F_S_2_P_1_M}" ] && [ ! -z "${referer_S_S_2_P_1_M}" ] && [ ! -z "${referer_F_S_2_P_A_I}" ] && [ ! -z "${referer_S_S_2_P_A_I}" ]; then
+            if [ ! -z "${referer_F_S_3_P_1_M}" ] && [ ! -z "${referer_S_S_3_P_1_M}" ] && [ ! -z "${referer_F_S_3_P_2_M}" ] && [ ! -z "${referer_S_S_3_P_2_M}" ] && [ ! -z "${referer_F_S_3_P_3_M}" ] && [ ! -z "${referer_S_S_3_P_3_M}" ] && [ ! -z "${referer_F_S_3_P_A_I}" ] && [ ! -z "${referer_S_S_3_P_A_I}" ]; then
+                if [ ! -z "${referer_F_S_4_P_1_M}" ] && [ ! -z "${referer_S_S_4_P_1_M}" ] &&  [ ! -z "${referer_F_S_4_P_A_I}" ] && [ ! -z "${referer_S_S_4_P_A_I}" ]; then
+                    if [ ! -z "${referer_F_S_5_P_1_M}" ] && [ ! -z "${referer_S_S_5_P_1_M}" ] && [ ! -z "${referer_F_S_5_P_A_I}" ] && [ ! -z "${referer_S_S_5_P_A_I}" ]; then
+                        log_status_and_exit_ex "PASS" "Referer set on each page in both session for NS  behaviour"
+                    else
+                        log_status_and_exit_ex "FAIL" "Referer is not set in both Session in 5th Page"
+                    fi
+                else
+                    log_status_and_exit_ex "FAIL" "Referer is not set in both Session in 4th Page"
+                fi
+            else
+                log_status_and_exit_ex "FAIL" "Referer is not set i both session in  3rd Page"
+            fi
+        else
+            log_status_and_exit_ex "FAIL" "Referer is not set in both session in  2nd Page"
+        fi
+    else
+        log_status_and_exit_ex "FAIL" "Referer is not set in both session in  1st Page"
+    fi
+}
+
+
+function validate_Referer_Case_010(){
+    debug_log "Referer case"
+    referer_Display_on_All_Request_page_1st_Group=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_0_0_*)
+    referer_Display_on_1st_Request_page_All_InlineUrl_2nd_Group=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_1_0_0_0_0_1_1_5_0.dat| grep "http://10.10.30.96/tours/index.html")
+    referer_Display_on_2nd_Request_page_1st_MainUrl_2nd_Group=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_1_0_0_1_0_1_1_6_0.dat | grep "http://10.10.30.96/tours/index.html")
+    referer_Display_on_2nd_Request_page_All_InlineUrl_2nd_Group=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_1_0_0_1_0_1_1_6_0.dat | grep "http://10.10.30.96/cgi-bin/login?userSession")
+    referer_Display_on_3rd_Request_page_1st_MainUrl_2nd_Group=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_1_0_0_2_0_1_1_7_0.dat | grep "http://10.10.30.96/cgi-bin/login?userSession")
+    referer_Display_on_3rd_Request_page_All_InlineUrl_2nd_Group=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_1_0_0_2_0_1_1_7_0.dat | grep "http://10.10.30.96/cgi-bin/reservation")
+    referer_Display_on_4th_Request_page_1st_MainUrl_2nd_Group=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_1_0_0_3_0_1_1_8_0.dat | grep "http://10.10.30.96/cgi-bin/reservation")
+    referer_Display_on_4th_Request_page_All_InlineUrl_2nd_Group=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_1_0_0_3_0_1_1_8_0.dat | grep "http://10.10.30.96/cgi-bin/findflight?depart=Acapulco&departDate")
+    referer_Display_on_5th_Request_page_1st_MainUrl_2nd_Group=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_1_0_0_4_0_1_1_9_0.dat | grep "http://10.10.30.96/cgi-bin/findflight?depart=Acapulco&departDate")
+    referer_Display_on_5th_Request_page_All_InlineUrl_2nd_Group=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_1_0_0_4_0_1_1_9_0.dat | grep "http://10.10.30.96/cgi-bin/welcome")
+    if [ -z "${referer_Display_on_All_Request_page_1st_Group}" ]; then
+        if [ ! -z "${referer_Display_on_1st_Request_page_All_InlineUrl_2nd_Group}" ]; then
+            if [ ! -z "${referer_Display_on_2nd_Request_page_1st_MainUrl_2nd_Group}" ] && [ ! -z "${referer_Display_on_2nd_Request_page_All_InlineUrl_2nd_Group}" ]; then
+                if [ ! -z "${referer_Display_on_3rd_Request_page_1st_MainUrl_2nd_Group}" ] && [ ! -z "${referer_Display_on_3rd_Request_page_All_InlineUrl_2nd_Group}" ]; then
+                    if [ ! -z "${referer_Display_on_4th_Request_page_1st_MainUrl_2nd_Group}" ] && [ ! -z "${referer_Display_on_4th_Request_page_All_InlineUrl_2nd_Group}" ]; then
+                        if [ ! -z "${referer_Display_on_5th_Request_page_1st_MainUrl_2nd_Group}" ] && [ ! -z "${referer_Display_on_5th_Request_page_All_InlineUrl_2nd_Group}" ]; then
+                            log_status_and_exit_ex "PASS" "Referer is  not set on request page 1st Group because referer mode is disable and Referer is set on 2nd Group because referer mode is enable"
+                        else
+                            log_status_and_exit_ex "FAIL" "Referer set on request page 2nd Group because referer mode is enable"
+                        fi
+                    else
+                        log_status_and_exit_ex "FAIL" "Referer set on request page 2nd Group because referer mode is enable"
+                    fi
+                else
+                    log_status_and_exit_ex "FAIL" "Referer set on request page 2nd Group because referer mode is enable"
+                fi
+            else
+                log_status_and_exit_ex "FAIL" "Referer set on request page 2nd Group because referer mode is enable"
+            fi
+        else
+            log_status_and_exit_ex "FAIL" "Referer set on request page 2nd Group because referer mode is enable"
+        fi
+    else
+        log_status_and_exit_ex "FAIL" "Referer set on request page 2nd Group because referer mode is enable"
+    fi
+    }
+
+
+function validate_Referer_Case_011(){
+        debug_log "Referer case"  
+    referer_Display_on_1st_Session_1st_Page_All_InlineUrl=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_0_0_0_0_0_0_0_0_0.dat | grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+    referer_Display_on_1st_Session_2nd_Page_1st_MainUrl=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_0_0_0_1_0_0_0_1_0.dat | grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+    referer_Display_on_1st_Session_2nd_Page_All_InlineUrl=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_0_0_0_1_0_0_0_1_0.dat | grep "http://10.10.30.96/cgi-bin/login?userSession")
+    referer_Display_on_1st_Session_3rd_Page_All_MainUrl=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_0_0_0_2_0_0_0_2_0.dat  | grep "http://10.10.30.96/cgi-bin/login?userSession")
+    referer_Display_on_1st_Session_3rd_Page_All_InlineUrl=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_0_0_0_2_0_0_0_2_0.dat  | grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+    referer_Display_on_1st_Session_4th_Page_1st_MainUrl=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_0_0_0_3_0_0_0_3_0.dat | grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+    referer_Display_on_1st_Session_4th_Page_All_InlineUrl=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_0_0_0_3_0_0_0_3_0.dat | grep "http://10.10.30.96/cgi-bin/findflight?depart=Acapulco&departDate")
+    referer_Display_on_1st_Session_5th_Page_1st_MainUrl=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_0_0_0_4_0_0_0_4_0.dat | grep "http://10.10.30.96/cgi-bin/findflight?depart=Acapulco&departDate")
+    referer_Display_on_1st_Session_5th_Page_All_InlineUrl=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_0_0_0_4_0_0_0_4_0.dat | grep "http://10.10.30.96/cgi-bin/welcome")
+    referer_Display_on_2nd_Session_1st_Page_All_InlineUrl=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_1_0_0_0_0_1_1_5_0.dat | grep "http://10.10.30.96/tours/index.html")
+    referer_Display_on_2nd_Session_2nd_Page_1st_MainUrl=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_1_0_0_1_0_1_1_6_0.dat | grep "http://10.10.30.96/tours/index.html")
+    referer_Display_on_2nd_Session_2nd_Page_All_InlineUrl=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_1_0_0_1_0_1_1_6_0.dat | grep "http://10.10.30.96/cgi-bin/login?userSession")
+    referer_Display_on_2nd_Session_3rd_Page_1st_MainUrl=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_1_0_0_2_0_1_1_7_0.dat | grep "http://10.10.30.96/cgi-bin/login?userSession")
+    referer_Display_on_2nd_Session_3rd_Page_All_InlineUrl=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_1_0_0_2_0_1_1_7_0.dat | grep "http://10.10.30.96/cgi-bin/reservation")
+    referer_Display_on_2nd_Session_4th_Page_1st_MainUrl=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_1_0_0_3_0_1_1_8_0.dat | grep "http://10.10.30.96/cgi-bin/reservation")
+    referer_Display_on_2nd_Session_4th_Page_All_InlineUrl=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_1_0_0_3_0_1_1_8_0.dat | grep "http://10.10.30.96/cgi-bin/findflight?depart=Acapulco&departDate")
+    referer_Display_on_2nd_Session_5th_Page_1st_MainUrl=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_1_0_0_4_0_1_1_9_0.dat | grep "http://10.10.30.96/cgi-bin/findflight?depart=Acapulco&departDate")
+    referer_Display_on_2nd_Session_5th_Page_All_InlineUrl=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_1_0_0_4_0_1_1_9_0.dat | grep "http://10.10.30.96/cgi-bin/welcome")
+    if [ ! -z "${referer_Display_on_1st_Session_1st_Page_All_InlineUrl}" ] && [ ! -z "${referer_Display_on_2nd_Session_1st_Page_All_InlineUrl}" ]; then
+        if [ ! -z "${referer_Display_on_1st_Session_2nd_Page_1st_MainUrl}" ] && [ ! -z "${referer_Display_on_2nd_Session_2nd_Page_1st_MainUrl}" ]; then
+            if [ ! -z "${referer_Display_on_1st_Session_2nd_Page_All_InlineUrl}" ] && [ ! -z "${referer_Display_on_2nd_Session_2nd_Page_All_InlineUrl}" ]; then
+                if [ ! -z "${referer_Display_on_1st_Session_3rd_Page_All_MainUrl}" ] && [ ! -z "${referer_Display_on_2nd_Session_3rd_Page_1st_MainUrl}" ]; then
+                    if [ ! -z "${referer_Display_on_1st_Session_3rd_Page_All_InlineUrl}" ] && [ ! -z "${referer_Display_on_2nd_Session_3rd_Page_All_InlineUrl}" ]; then
+                        if [ ! -z "${referer_Display_on_1st_Session_4th_Page_1st_MainUrl}" ] && [ ! -z "${referer_Display_on_2nd_Session_4th_Page_1st_MainUrl}" ]; then
+                            if [ ! -z "${referer_Display_on_1st_Session_4th_Page_All_InlineUrl}" ] && [ ! -z "${referer_Display_on_2nd_Session_4th_Page_All_InlineUrl}" ]; then
+                                if [ ! -z "${referer_Display_on_1st_Session_5th_Page_1st_MainUrl}" ] && [ ! -z "${referer_Display_on_2nd_Session_5th_Page_1st_MainUrl}" ]; then
+                                    if [ ! -z "${referer_Display_on_1st_Session_5th_Page_All_InlineUrl}" ] && [ ! -z "${referer_Display_on_2nd_Session_5th_Page_All_InlineUrl}" ]; then
+                                         log_status_and_exit_ex "PASS" "Referer set on each page according to given condition on both Session when mode is enable and change referer on redirect for browser behaviour"
+                                     else
+                                         log_status_and_exit_ex "FAIL" "Referer is not set on 1st Session and 2nd Session in All InlineUrl page on 5th Page"
+                                     fi
+                                 else
+                                     log_status_and_exit_ex "FAIL" "Referer is not set on 1st Session and 2nd Session in 1st MainUrl page on 5th Page"
+                                 fi
+                             else
+                                 log_status_and_exit_ex "FAIL" "Referer is not set on 1st Session and 2nd Session in All InlineUrl page on 4th Page"
+                             fi
+                         else
+                             log_status_and_exit_ex "FAIL" "Referer is not set on 1st Session and 2nd Session in 1st MainUrl page on 4th Page"
+                         fi
+                     else
+                         log_status_and_exit_ex "FAIL" "Referer is not set on 1st Session and 2nd Session in All InlineUrl page on 3rd Page"
+                     fi
+                 else
+                     log_status_and_exit_ex "FAIL" "Referer is not set on 1st Session and 2nd Session in 1st MainUrl page on 3rd Page"
+                 fi
+             else
+                 log_status_and_exit_ex "FAIL" "Referer is not set on 1st Session and 2nd Session in All InlineUrl page on 2nd Page"
+             fi
+         else
+             log_status_and_exit_ex "FAIL" "Referer is not set on 1st Session and 2nd Session in 1st MainUrl page on 2nd Page"
+         fi
+     else
+         log_status_and_exit_ex "FAIL" "Referer is not set on 1st Session and 2nd Session in All InlineUrl page on 1st Page"
+     fi       
+}
+
+function validate_Referer_Case_012(){
+    referer_F_S_1_P_1_M=$(egrep '^Referer' ${F_S_1_P}| grep "http://10.10.30.96/http_referer/Redirection1.html")
+    referer_F_S_1_P_2_M=$(egrep '^Referer' ${F_S_1_P}| grep "http://10.10.30.96/http_referer/Redirection2.html")
+    referer_F_S_1_P_3_M=$(egrep '^Referer' ${F_S_1_P}| grep "http://10.10.30.96/http_referer/Redirection3.html")
+    referer_F_S_1_P_4_M=$(egrep '^Referer' ${F_S_1_P}| grep "http://10.10.30.96/http_referer/Redirection4.html")
+    referer_F_S_1_P_A_I=$(egrep '^Referer' ${F_S_1_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+    referer_F_S_2_P_1_M=$(egrep '^Referer' ${F_S_2_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+    referer_F_S_2_P_A_I=$(egrep '^Referer' ${F_S_2_P}| grep "http://10.10.30.96/cgi-bin/login?userSession")
+    referer_F_S_3_P_1_M=$(egrep '^Referer' ${F_S_3_P}| grep "http://10.10.30.96/cgi-bin/login?userSession")
+    referer_F_S_3_P_2_M=$(egrep '^Referer' ${F_S_3_P}| grep "http://10.10.30.96/http_referer/Redirection3.html")
+    referer_F_S_3_P_3_M=$(egrep '^Referer' ${F_S_3_P}| grep "http://10.10.30.96/http_referer/Redirection4.html")
+    referer_F_S_3_P_A_I=$(egrep '^Referer' ${F_S_3_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+    referer_F_S_4_P_1_M=$(egrep '^Referer' ${F_S_4_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+    referer_F_S_4_P_A_I=$(egrep '^Referer' ${F_S_4_P}| grep "http://10.10.30.96/cgi-bin/findflight?depart=Acapulco&depart")
+    referer_F_S_5_P_1_M=$(egrep '^Referer' ${F_S_5_P}| grep "http://10.10.30.96/cgi-bin/findflight?depart=Acapulco&depart")
+    referer_F_S_5_P_A_I=$(egrep '^Referer' ${F_S_5_P}| grep "http://10.10.30.96/cgi-bin/welcome")
+    referer_S_S_1_P_A_I=$(egrep '^Referer' ${F_S_5_P}| grep "http://10.10.30.96/tours/index.html")
+    referer_S_S_2_P_1_M=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_1_0_0_1_0_1_1_6_0.dat| grep "http://10.10.30.96/tours/index.html")
+    referer_Display_on_2nd_Session_2nd_Page_All_InlineUrl=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_1_0_0_1_0_1_1_6_0.dat | grep "http://10.10.30.96/cgi-bin/login?userSession")
+    referer_Display_on_2nd_Session_3rd_Page_1st_InlineUrl=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_1_0_0_2_0_1_1_7_0.dat | grep "http://10.10.30.96/cgi-bin/login?userSession")
+    referer_Display_on_2nd_Session_4th_Page_1st_MainUrl=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_1_0_0_3_0_1_1_8_0.dat | grep "http://10.10.30.96/cgi-bin/login?userSession")
+    referer_Display_on_2nd_Session_4th_Page_All_InlineUrl=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_1_0_0_3_0_1_1_8_0.dat | grep "http://10.10.30.96/cgi-bin/findflight?depart=Acapulco&departDatehttp")
+    referer_Display_on_2nd_Session_5th_Page_1st_MainUrl=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_1_0_0_4_0_1_1_9_0.dat | grep "http://10.10.30.96/cgi-bin/findflight?depart=Acapulco&departDate")
+    referer_Display_on_2nd_Session_5th_Page_All_InlineUrl=$(egrep '^Referer' ${T_ID_REQ_PATH}/url_req_1_0_0_4_0_1_1_9_0.dat | grep "http://10.10.30.96/cgi-bin/welcome")
+    if [ ! -z "${referer_Display_on_1st_Session_1st_Page_1st_MainUrl}" ] &&  [ ! -z "${referer_Display_on_1st_Session_1st_Page_2nd_MainUrl}" ] && [ ! -z "${referer_Display_on_1st_Session_1st_Page_3rd_MainUrl}" ] && [ ! -z "${referer_Display_on_1st_Session_1st_Page_4th_MainUrl}" ]; then
+            if [ ! -z "${referer_Display_on_1st_Session_1st_Page_All_InlineUrl}" ] && [ ! -z "${referer_Display_on_2nd_Session_1st_Page_All_InlineUrl}" ]; then
+                if [ ! -z "${referer_Display_on_1st_Session_2nd_Page_1st_MainUrl}" ] && [ ! -z "${referer_Display_on_2nd_Session_2nd_Page_1st_MainUrl}" ]; then
+                    if [ ! -z "${referer_Display_on_1st_Session_2nd_Page_All_InlineUrl}" ] && [ ! -z "${referer_Display_on_2nd_Session_3rd_Page_1st_InlineUrl}" ]; then
+                        if [ ! -z "${referer_Display_on_1st_Session_3rd_Page_1st_MainUrl}" ] && [ ! -z "${referer_Display_on_1st_Session_3rd_Page_2nd_MainUrl}" ] && [ ! -z "${referer_Display_on_1st_Session_3rd_Page_3rd_MainUrl}" ]; then
+                                if [ ! -z "${referer_Display_on_1st_Session_3rd_Page_All_InlineUrl}" ] && [ ! -z "${referer_Display_on_2nd_Session_3rd_Page_1st_InlineUrl}" ]; then
+                                    if [ ! -z "${referer_Display_on_1st_Session_4th_Page_1st_MainUrl}" ] && [ ! -z "${referer_Display_on_2nd_Session_4th_Page_1st_MainUrl}" ]; then
+                                        if [ ! -z "${referer_Display_on_1st_Session_5th_Page_1st_MainUrl}" ] && [ ! -z "${referer_Display_on_2nd_Session_5th_Page_1st_MainUrl}" ]; then
+                                            if [ ! -z "${referer_Display_on_1st_Session_5th_Page_All_InlineUrl}" ] && [ ! -z "${referer_Display_on_2nd_Session_5th_Page_All_InlineUrl}" ]; then
+                                                log_status_and_exit_ex "PASS" "Referer set on each page according to given condition on both Session when mode is enable and change referer on redirect for browser behaviour"
+                                            else
+                                                log_status_and_exit_ex "FAIL" "Referer is not set on 1st Session and 2nd Session in All InlineUrl page on 5th Page"
+                                            fi
+                                        else
+                                            log_status_and_exit_ex "FAIL" "Referer is not set on 1st Session and 2nd Session in 1st MainUrl page on 5th Page"
+                                        fi
+                                    else
+                                        log_status_and_exit_ex "FAIL" "Referer is not set on 1st Session and 2nd Session in 1st MainUrl page on 4th Page"
+                                    fi
+                                else
+                                    log_status_and_exit_ex "FAIL" "Referer is not set on 1st Session and 2nd Session in All InlineUrl page on 3rd Page"
+                                fi
+                                else
+                                    log_status_and_exit_ex "FAIL" "Referer is not set on 1st Session All MainUrl page on 3rd Page"
+                                fi
+                            else
+                                log_status_and_exit_ex "FAIL" "Referer is not set on 1st Session and 2nd Session in All InlineUrl page on 2nd Page"
+                            fi
+                        else
+                            log_status_and_exit_ex "FAIL" "Referer is not set on 1st Session and 2nd Session in 1st  MainUrl page on 2nd Page"
+                        fi
+                    else
+                        log_status_and_exit_ex "FAIL" "Referer is not set on 1st Session and 2nd Session in All InlineUrl page on 1st Page"
+                    fi
+                else
+                    log_status_and_exit_ex "FAIL" "Referer is not set on 1st Session All MainUrl page on 1st Page"
+                fi
+
+}
+
+
+function validate_Referer_Case_013(){
+    referer_1_P_A_I=$(egrep '^Referer' ${F_S_1_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+    referer_2_P_1_M=$(egrep '^Referer' ${F_S_2_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+    referer_2_P_A_I=$(egrep '^Referer' ${F_S_2_P}| grep "https://10.10.30.96/cgi-bin/login?userSession")
+    debug_log "referer_1_P_A_I: $referer_1_P_A_I"
+    debug_log "referer_2_P_1_M: $referer_2_P_1_M"
+    debug_log "referer_2_P_A_I: $referer_2_P_A_I"
+    if [ ! -z "${referer_1_P_A_I}" ]; then
+        if [ ! -z "${referer_2_P_1_M}" ] && [ ! -z "${referer_2_P_A_I}" ]; then
+                log_status_and_exit_ex "PASS" "Referer on each page and change referer on redirect for browser behaviour and Linking from HTTP to HTTPS."
+            else
+                log_status_and_exit_ex "FAIL" "Referer is not set on 2nd page ALL InlineUrl" 
+            fi
+        else
+            log_status_and_exit_ex "FAIL" "Referer is not set on 1st page ALL InlineUrl and main "
+        fi
+}
+
+function validate_Referer_Case_014(){
+    referer_4_P_1_M=$(egrep '^Referer' ${F_S_4_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+    referer_4_P_A_I=$(egrep '^Referer' ${F_S_4_P}| grep "https://10.10.30.96/cgi-bin/findflight?depart=Acapulco&departDate")
+    referer_5_P_1_M=$(egrep '^Referer' ${F_S_5_P}| grep "https://10.10.30.96/cgi-bin/findflight?depart=Acapulco&departDate")
+    referer_5_P_A_I=$(egrep '^Referer' ${F_S_5_P}| grep "https://10.10.30.96/cgi-bin/welcome")
+    debug_log "referer_4_P_1_M: $referer_4_P_1_M"
+    debug_log "referer_4_P_A_I: $referer_4_P_A_I"
+    debug_log "referer_5_P_1_M: $referer_5_P_1_M"
+    debug_log "referer_5_P_A_I: $referer_5_P_A_I"
+    if [ ! -z "${referer_4_P_1_M}" ] && [ ! -z "${referer_4_P_A_I}" ]; then
+        if [ ! -z "${referer_5_P_1_M}" ] && [ ! -z "${referer_5_P_A_I}" ]; then
+             log_status_and_exit_ex "PASS" "Referer on each page and change referer on redirect for browser behaviour and Linking from HTTPS to HTTPS."
+         else
+             log_status_and_exit_ex "FAIL" "Referer is not set on 1st MainUrl and All InlineUrl in 5th page"
+         fi 
+     else
+         log_status_and_exit_ex "FAIL" "Referer is not set on 1st MainUrl and All InlineUrl in 4th Page"
+     fi
+            
+}
+
+function validate_Referer_Case_015(){
+    referer_2_P_1_M=$(egrep '^Referer' ${F_S_2_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+    referer_2_P_A_I=$(egrep '^Referer' ${F_S_2_P}| grep "https://10.10.30.96/cgi-bin/login?userSession")
+    referer_3_P_A_I=$(egrep '^Referer' ${F_S_3_P}| grep "http://10.10.30.96/http_referer/Redirection1_response.html")
+    debug_log "referer_2_P_1_M : $referer_2_P_1_M"
+    debug_log "referer_2_P_A_I : $referer_2_P_A_I"
+    debug_log "referer_3_P_A_I : $referer_3_P_A_I"
+    if [ ! -z "${referer_2_P_1_M}" ] && [ ! -z "${referer_2_P_A_I}" ]; then
+        if [ ! -z "${referer_3_P_A_I}" ]; then
+            log_status_and_exit_ex "PASS" "Referer on each page and change referer on redirect for browser behaviour and Linking from HTTPS to HTTP. "
+        else
+            log_status_and_exit_ex "FAIL" "Referer is not set on All InlineUrl in 3rd Page"
+        fi
+    else
+        log_status_and_exit_ex "FAIL" "Referer is not set on 1st MainUrl and All InlineUrl in 2nd page"
+    fi
+}
+
+main
+exit 0

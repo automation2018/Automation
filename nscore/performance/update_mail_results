@@ -1,0 +1,258 @@
+#!/usr/bin/env bash
+
+MAIL_PROP_FILE="mail.properties"
+WORKBENCH="/home/automation/workbench/automation/nscore/performance"
+RESULTS_DIR="$WORKBENCH/results"
+version=$(nsu_get_version | head -1 | awk -F " " '{print $2}')
+build=$(nsu_get_version | head -1 | cut -d '#' -f2 | cut -d ')' -f1 | sed -e 's/\ //g')
+
+buildtimestamp=$(date +'%d/%m/%y %I:%M:%S %p')
+start_time=${1}
+
+PERF_RESULT_FILES="$RESULTS_DIR/${version}/.${build}"
+
+function get_metrics(){
+    file="$1"
+    pattern="$2"
+    count=$(grep "<testsuite " ${file} | egrep -ow "${pattern}=\"[0-9]+\""|egrep -o  "[0-9]+")
+    echo $count
+}
+
+function get_pct_change() {
+    baseline="$1"
+    current="$2"
+    
+    if [ "${current}" == "NA" ];then
+        echo "NA"
+    else    
+        echo $(python -c "print '%3.3f' %((float($current - $baseline) / $current) * 100)")
+    fi
+}
+
+function get_perf_metrices(){
+    param=$1
+    filename=$2
+    field=$3
+    metric=$(grep "$param" $WORKBENCH/.perf/${filename} | cut -d ',' -f${field})
+    [ -z $metric ] && echo "NA" || echo $metric
+}
+    
+function set_test_results(){ 
+    total=$(grep "TotalExecuted" /tmp/last | cut -d '=' -f2)
+    nsfail=$(grep "NSFailCount" /tmp/last | cut -d '=' -f2)
+    
+    if [ "${total}" != "${nsfail}" ];then
+		first_attachment=$(basename $(ls -tr $PERF_RESULT_FILES/*.xml | tail -1))
+		second_attachment=$(basename $(ls -tr $PERF_RESULT_FILES/*.xml | tail -2 |head -1))
+		total=0;passed=0;failed=0
+		ATTACHMENTS=( "$first_attachment" "$second_attachment" )
+
+		# TODO
+		# Check xml file for netstorm fail cases
+		# This is to ensure all tests ran;status 
+		# has been checked;if some tests has been
+		# failed due to NetStormFail; reporting need 
+		# to be done accordingly
+		for attachment in ${ATTACHMENTS[*]}; do
+			total=$(($total + $(get_metrics $PERF_RESULT_FILES/$attachment "total")))
+			failed=$(($failed + $(get_metrics $PERF_RESULT_FILES/$attachment "failures")))
+			passed=$(($passed + $(get_metrics $PERF_RESULT_FILES/$attachment "passed")))
+		done 
+		
+		cps=$(get_perf_metrices "CPS" "PerfResult" 8)
+        hps=$(get_perf_metrices "HPS" "PerfResult" 9)
+        throughput=$(get_perf_metrices "THROUGHPUT" "PerfResult" 10)
+		cps_java=$(get_perf_metrices "CPS" "javabasedperfresult" 8)
+        hps_java=$(get_perf_metrices "HPS" "javabasedperfresult" 9)
+        throughput_java=$(get_perf_metrices "THROUGHPUT" "javabasedperfresult" 10)
+		#hps=$(grep "HPS" $WORKBENCH/.perf/PerfResult | cut -d ',' -f9)
+		#throughput=$(grep "THROUGHPUT" $WORKBENCH/.perf/PerfResult | cut -d ',' -f10)
+		#cps_java=$(grep "CPS" $WORKBENCH/.perf/javabasedperfresult | cut -d ',' -f8)
+		#hps_java=$(grep "HPS" $WORKBENCH/.perf/javabasedperfresult | cut -d ',' -f9)
+		#throughput_java=$(grep "THROUGHPUT" $WORKBENCH/.perf/javabasedperfresult | cut -d ',' -f10)
+        statusbody=$(echo "Failed: $failed test(s), Passed: $passed test(s), NSFails: $nsfail test(s), Total: $total test(s)")
+		
+		if [ $total -eq $passed ] && [ $total -gt 0 ];then
+			STATUS=Successful
+		else
+			STATUS=Failed
+		fi
+    else
+        STATUS="Failed"
+        total=$(grep "TotalExecuted" /tmp/last | cut -d '=' -f2)
+        nsfail=$(grep "NSFailCount" /tmp/last | cut -d '=' -f2)
+        failed=0
+        passed=0
+	    statusbody=$(echo "Failed: $failed test(s), Passed: $passed test(s), NSFails: $nsfail test(s), Total: $total test(s)")
+	    cps="NA"
+	    hps="NA"
+	    throughput="NA"
+	    cps_java="NA"
+	    hps_java="NA"
+	    throughput_java="NA"
+    fi
+}
+
+
+function check_and_set_project_status(){
+  if [ $failed -gt 0 ] || [ $nsfail -gt 0 ]; then
+    echo "<td style='background-color: #FBE9E7'>Failed</td>"
+  else
+    echo "<td style='background-color: #E8F5E9'>Passed</td>"
+  fi
+}
+
+
+function set_up_email(){
+    set_test_results
+    echo -e "
+<!DOCTYPE html>
+<html>
+<head>
+    <style type='text/css'>
+        body{
+            font-size: 1.0rem;
+            color: #333;
+        }
+       .container{
+          width: 90%;
+          padding: 50px;
+          border: 1px solid #e0e0e0;
+        }
+        table {
+            border-collapse: collapse;
+            width: 80%;
+        }
+        table, th, td { 
+            border: 1px solid #e0e0e0;
+            padding: 10px;
+            font-size: 1em;
+        }
+        th {
+           background-color: #f5f5f5;
+           text-align: left;
+           color: #333;
+        }
+        tr td{
+            text-align: left;
+        }
+        .divider {
+          border-top: 1px solid #e0e0e0;
+        }
+        .signature{ color: #607d8b;}
+        .lead { 
+        font-size: 1.3rem; 
+        color: #616161; 
+        font-weight: 300;
+        }
+
+    </style>
+</head>
+<body>
+    <div class='container'>
+    <table style='width: 91%!important; border: 0px;'>
+        <tr>
+          <td width='35%' style='border: 0px!important; padding: 0px !important'><h2 style='font-size: 1.68rem; color: #616161; font-weight: 300;'>Report For: NS Core Performance</h3></td>
+          <td width='65%' style='border: 0px! important; padding: 0px!important'>
+            <table>
+               <tr>
+               <th>Status</th>
+               <th>Tolerance(Pct)</th>
+               <th>Start Time</th>
+               <th>End Time</th>
+               </tr>
+               <tr>
+               $(check_and_set_project_status)
+               <td>&plusmn; 5%</td>
+               <td>${start_time}</td>
+               <td>${buildtimestamp}</td>
+               </tr>
+            </table>
+          </td>
+        </tr>
+    </table>
+    <hr/>
+    <br>
+    <table>
+    <caption class='lead'>Basic Performance Stats For C Type Script</caption>
+        <tr>
+            <th>Metric</th>
+            <th>Baseline</th>
+            <th>Current</th>
+            <th>% Change</th>
+        </tr>
+        <tr>
+            <td>CPS</td>
+            <td>59899</td>
+            <td>$cps</td>
+            <td>$(get_pct_change 59899 $cps)</td>
+        </tr>
+        <tr>
+            <td>HPS</td>
+            <td>403374</td>
+            <td>$hps</td>
+            <td>$(get_pct_change 403374 $hps)</td>
+        </tr>
+        <tr>
+            <td>THROUGHPUT</td>
+            <td>916163</td>
+            <td>$throughput</td>
+            <td>$(get_pct_change 916163 $throughput)</td>
+        </tr>
+    </table>
+    <br>
+    <br>
+    <table>
+    <caption class='lead'>Basic Performance Stats For Java Type Script</caption>
+        <tr>
+            <th>Metric</th>
+            <th>Baseline</th>
+            <th>Current</th>
+            <th>% Change</th>
+        </tr>
+        <tr>
+            <td>CPS</td>
+            <td>27804</td>
+            <td>$cps_java</td>
+            <td>$(get_pct_change 27804 $cps_java)</td>
+        </tr>
+        <tr>
+            <td>HPS</td>
+            <td>32662</td>
+            <td>$hps_java</td>
+            <td>$(get_pct_change 32662 $hps_java)</td>
+        </tr>
+        <tr>
+            <td>THROUGHPUT</td>
+            <td>913804</td>
+            <td>$throughput_java</td>
+            <td>$(get_pct_change 913804 $throughput_java)</td>
+        </tr>
+    </table>
+	<br>
+    <h5 class='lead'>$statusbody</h5>
+    <a href='http://10.10.30.37'>View Online Automation Reports</a>
+    <hr/>
+    <br><br>
+    Automation Team,
+   <br>Cavisson Systems Inc
+   </div>
+</body>
+</html>" >/home/automation/workbench/automation/nscore/lib/mail_results.html
+    echo "curr.release = $version" >${MAIL_PROP_FILE}
+    echo "curr.build = $build" >>${MAIL_PROP_FILE}
+    echo "configured.mail.list.to = dl-qa-teamleads@cavisson.com,neeraj@cavisson.com,functionalheads@cavisson.com" >>${MAIL_PROP_FILE}
+    echo "configured.mail.list.cc = dl-qa-nsc@cavisson.com,dl-qa-auto@cavisson.com,dl-sup-projmgt@cavisson.com" >>${MAIL_PROP_FILE}
+    #echo "configured.mail.list.to = vishal.singhal@cavisson.com" >>mail.properties
+    #echo "configured.mail.list.cc = arun.yadav@cavisson.com" >>mail.properties
+    echo -e "buil.status.header = $STATUS" >>${MAIL_PROP_FILE}
+    echo -e "mail.result.file = /home/automation/workbench/automation/nscore/lib/mail_results.html" >>${MAIL_PROP_FILE}
+    echo -e "perf.results.dir = $PERF_RESULT_FILES" >>${MAIL_PROP_FILE}
+    echo -e "first.attachment = $first_attachment" >>${MAIL_PROP_FILE}
+    echo -e "second.attachment = $second_attachment" >>${MAIL_PROP_FILE}
+	echo "mail.user = automation@cavisson.com" >> ${MAIL_PROP_FILE}
+    echo "mail.password = Cavisson!" >> ${MAIL_PROP_FILE}
+
+}
+
+set_up_email

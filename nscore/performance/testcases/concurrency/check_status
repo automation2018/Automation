@@ -1,0 +1,34 @@
+#!/bin/bash
+
+source $NS_WDIR/lib/automation_util
+
+BaseLineCSV="$NS_WDIR/logs/tsr/$TEST_CYCLE_NUM/BaseLineCSVData.CSV"
+CurrentCSV="$NS_WDIR/logs/tsr/$TEST_CYCLE_NUM/CurrentDataCSVData.CSV"
+T_NAME=$(get_tname)
+Component=performance
+PROGRESS_REPORT_FILE="$NS_WDIR/logs/TR${T_RUN_ID}/progress.report"
+
+
+# Validation details
+# 200000 users should be ramped up and down properly
+# There should be no url failures 
+ramped_up_users_count=$(grep "RAMPUP" ${PROGRESS_REPORT_FILE} | cut -d' ' -f3)
+ramped_down_users_count=$(grep "RAMPDOWN" ${PROGRESS_REPORT_FILE} | cut -d' ' -f3)
+urls_completed=$(grep "Url  Report:" ${PROGRESS_REPORT_FILE} | egrep -o 'completed [0-9,]+' | cut -d' ' -f2)
+urls_succeed=$(grep "Url  Report:" ${PROGRESS_REPORT_FILE} | egrep -o 'succ [0-9,]+' | cut -d' ' -f2)
+
+
+debug_log "ramped up users count is $ramped_up_users_count;ramp down users count is $ramped_down_users_count"
+debug_log "total urls count is $urls_completed;succeed urls count is $urls_succeed"
+
+
+if [ "$ramped_up_users_count" == "200000" ] && \
+   [ "$ramped_down_users_count" == "200000" ] && \
+   [ $urls_completed == $urls_succeed ] ; then
+    log_status_and_exit_ex "PASS" "testcase $T_NAME passed"
+else
+    log_status_and_exit_ex "FAIL" "testcase $T_NAME failed"
+fi
+
+
+exit 0

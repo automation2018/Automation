@@ -1,0 +1,9 @@
+#!/bin/bash 
+
+#Global variable declaration
+#This files needs to be sourced out 
+
+PYTHON_TOOL="python /home/automation/workbench/automation/nscore/bin/ndi_text_to_xml.py"
+DB_UPLOAD="python /home/automation/workbench/automation/nscore/lib/remote_db_upload.py"
+COMPONENT="Netstorm"
+DATABASE="/home/automation/workbench/automation/nscore/lib/analytics.db"

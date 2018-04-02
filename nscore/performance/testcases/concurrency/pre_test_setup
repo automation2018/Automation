@@ -1,0 +1,24 @@
+#!/bin/bash
+. $NS_WDIR/lib/automation_util
+
+
+HEADER="Case, TestID, Category, ReleaseID, BuildID, ComponentID, TestRun, CPS, HPS, ThroughputRX"
+BASELINE_FILE="$NS_WDIR/logs/tsr/$TEST_CYCLE_NUM/BaseLineCSVData.CSV"
+CURRENT_FILE="$NS_WDIR/logs/tsr/$TEST_CYCLE_NUM/CurrentDataCSVData.CSV"
+
+sed -i '/::/s/^/#/' $NS_WDIR/sys/ip_entries
+
+if [ ! -f ${BASELINE_FILE} ] && [ ! -f ${CURRENT_FILE} ]; then
+    touch $BASELINE_FILE 
+    touch $CURRENT_FILE 
+
+    BaseLineDataFile=${BASELINE_FILE}
+    CurrentCSVFile=${CURRENT_FILE}
+
+    echo ${HEADER} > ${BaseLineDataFile} 
+    echo ${HEADER} > ${CurrentCSVFile}
+else
+    echo "File already Exists"	
+fi
+
+exit 0

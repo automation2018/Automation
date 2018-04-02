@@ -1,0 +1,31 @@
+#!/bin/bash
+
+. $NS_WDIR/lib/automation_util
+T_NAME=$(get_tname)
+
+get_ka_total_conn(){
+    #conn_value=$(grep "TCP Total Connections Open(NA)" $NS_WDIR/logs/TR$T_RUN_ID/summary_gdf.data | cut -d '|' -f8 |cut -d '.' -f1)
+    conn_value=$(grep "HTTP TCP Conns:" $NS_WDIR/logs/TR$T_RUN_ID/progress.report |tail -1|cut -d'=' -f5|cut -d' ' -f1)
+ 
+    debug_log "conn_value=$conn_value"
+    echo "$conn_value"
+}
+
+if [ $T_NAME == "SMOKE-006-001" ];then
+  get_ka_total_conn
+  if [ $conn_value -eq 8 ];then
+      log_status_and_exit_ex "PASS" "KeepAlive with percentage 100 Passed"
+  else 
+      log_status_and_exit_ex "FAIL" "KeepAlive with percentage 100 Failed"
+  fi
+fi
+
+if [ $T_NAME == "SMOKE-006-002" ];then
+  get_ka_total_conn  
+  if [ $conn_value -eq 570 ];then
+        log_status_and_exit_ex "PASS" "KeepAlive with percentage 0 Passed"
+    else
+        log_status_and_exit_ex "FAIL" "KeepAlive with percentage 0 Failed"
+    fi
+fi  
+exit 0

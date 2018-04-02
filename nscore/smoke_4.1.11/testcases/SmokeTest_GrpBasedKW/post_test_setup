@@ -1,0 +1,3 @@
+#!/bin/bash
+cat /tmp/virtual_user_trace.log
+exit 0

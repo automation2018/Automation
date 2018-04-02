@@ -1,0 +1,127 @@
+#!/usr/bin/env bash
+
+source $NS_WDIR/lib/automation_util
+
+SUMMARY_GDF_FILE="${NS_WDIR}/logs/TR${T_RUN_ID}/summary_gdf.data"
+SYNC_POINT_FILE="${NS_WDIR}/logs/TR${T_RUN_ID}/ready_reports/sync_point_summary.report"
+TX_DETAIL_FILE="${NS_WDIR}/logs/TR${T_RUN_ID}/trans_detail.dat"
+
+
+T_Name=$(get_tname)
+debug_log "Total success URL count for TC : ${T_Name} with TR${T_RUN_ID} is ${SD_TotalSuccURL}"
+
+
+function sync_point_user(){
+    Sync_Users=$(grep "SyncPoint Vusers" ${SUMMARY_GDF_FILE}  | awk -F '|' '{print $8}' |cut -d '.' -f1)
+    Succ_Msg=$(grep -w "Release target reached" ${SYNC_POINT_FILE} | awk -F '|' '{print $10}')
+    FirstTrans_Time=$(grep -w "hpd_page1_trans1" ${TX_DETAIL_FILE}  | awk -F '|' '{print $4}' |cut -d '.' -f1)
+    FirstPage_Time=$(grep -w "hpd_page1_trans1" ${TX_DETAIL_FILE}  | awk -F '|' '{print $4}' |cut -d '.' -f1)
+    InBtween_Trans_Time=$(grep -w "hpd_page5_trans5" ${TX_DETAIL_FILE} | awk -F '|' '{print $4}' |cut -d '.' -f1)
+    TimeOut_Info=$(grep -w "Vuser inter arrival timeout" ${SYNC_POINT_FILE} | awk -F '|' '{print $10}')
+    InbtweenPage_Time=$(grep -w "hpd_page2_trans2" ${TX_DETAIL_FILE}  | awk -F '|' '{print $4}' |cut -d '.' -f1)
+    Overall_Timeout=$(grep -w "Overall timeout" ${SYNC_POINT_FILE} | awk -F '|' '{print $10}')
+    Vuser_TimeOut=$(grep -w "Vuser inter arrival timeout" ${SYNC_POINT_FILE}| awk -F '|' '{print $10}')
+    debug_log "Sync_Users=$Sync_Users;Succ_Msg=$Succ_Msg"
+    debug_log "FirstTrans_Time=$FirstTrans_Time;FirstPage_Time=$FirstPage_Time"
+    debug_log "InBtween_Trans_Time=$InBtween_Trans_Time;TimeOut_Info=$TimeOut_Info"
+    debug_log "InbtweenPage_Time=$InbtweenPage_Time"
+    debug_log "Overall_Timeout=$Overall_Timeout"
+    debug_log "Vuser_TimeOut=${Vuser_TimeOut}"
+}
+
+
+sync_point_user
+
+
+if [ "XX$T_Name" == "XXSMOKE-013-001" ];then
+    if [ $Sync_Users -eq 9 ] && \
+       [ $SD_TotalSuccURL -eq 230 ] && \
+       [ "xx$Succ_Msg" == "xxRelease target reached." ] && \
+       [ $FirstTrans_Time -le 1 ];then
+        log_status_and_exit_ex "PASS" "SyncPoint Before FirstTrans 10Users all users release Passed"                      
+    else
+        log_status_and_exit_ex "FAIL" "SyncPoint Before FirstTrans 10Users all users release Failed"
+    fi
+fi
+
+
+if [ "xx$T_Name" == "xxSMOKE-013-002" ];then
+    if [ $Sync_Users -eq 4 ] && \
+       [ $SD_TotalSuccURL -eq 230 ] && \
+       [ "xx$Succ_Msg" == "xxRelease target reached." ] && \
+       [ $FirstTrans_Time -le 1 ];then
+	debug_log "$Sync_Users , $SD_TotalSuccURL , $Succ_Msg ,$FirstTrans_Time"
+        log_status_and_exit_ex "PASS" "SyncPoint Before FirstTrans 10Users 5 users release  Passed"
+    else
+	debug_log "$Sync_Users , $SD_TotalSuccURL , $Succ_Msg ,$FirstTrans_Time"
+        log_status_and_exit_ex "FAIL" "SyncPoint Before FirstTrans 10Users 5 users release  Failed"
+    fi
+fi
+
+
+if [ "XX$T_Name" == "XXSMOKE-013-003" ]; then
+    if [ $Sync_Users -eq 10 ] && \
+       [ "XX$TimeOut_Info" == "XXVuser inter arrival timeout" ] && \
+       [ $FirstTrans_Time -le 1 ]; then
+        log_status_and_exit_ex "PASS" "SyncPoint Before FirstTrans 10Users 20 users release timeout  Passed"
+    else
+        log_status_and_exit_ex "FAIL" "SyncPoint Before FirstTrans 10Users 20 users release timeout Failed"
+    fi
+fi
+			
+
+if [ "XX$T_Name" == "XXSMOKE-013-004" ];then
+    if [ $Sync_Users -eq 9 ] && \
+       [ $SD_TotalSuccURL -eq 230 ] && \
+       [ "xx$Succ_Msg" == "xxRelease target reached." ] && \
+       [ $InBtween_Trans_Time -le 1 ];then
+        log_status_and_exit_ex "PASS" "SyncPoint In Between Transasctions 10 Users all users release Passed"
+    else
+        log_status_and_exit_ex "FAIL" "SyncPoint In Between Transasctions 10 Users all users release Failed"                
+    fi
+fi
+
+
+if [ "XX$T_Name" == "XXSMOKE-013-005" ];then
+    if [ $Sync_Users -ge 8 ] && \
+       [ $SD_TotalSuccURL -eq 230 ] && \
+       [ "xx$Succ_Msg" == "xxRelease target reached." ] && \
+       [ $FirstPage_Time -le 5 ];then
+        log_status_and_exit_ex "PASS" "SyncPoint Before First Page 10 Users all users release Passed"
+    else
+        log_status_and_exit_ex "FAIL" "SyncPoint Before First Page 10 Users all users release Failed"
+    fi
+fi
+
+
+if [ "XX$T_Name" == "XXSMOKE-013-006" ];then
+    if [ $Sync_Users -eq 4 ] && \
+       [ $SD_TotalSuccURL -eq 230 ] && \
+       [ "xx$Succ_Msg" == "xxRelease target reached." ] && \
+       [ $InbtweenPage_Time -le 5 ];then
+	debug_log "$Sync_Users , $SD_TotalSuccURL , $Succ_Msg ,$FirstTrans_Time"
+        log_status_and_exit_ex "PASS" "SyncPoint In Between Pages 10Users 5users release Passed"
+    else
+	debug_log "$Sync_Users , $SD_TotalSuccURL , $Succ_Msg ,$FirstTrans_Time"
+        log_status_and_exit_ex "FAIL" "SyncPoint In Btween Pages 10Users 5users release Failed" 
+    fi
+fi
+
+if [ "XX$T_Name" == "XXSMOKE-013-007" ]; then
+    if [ "xx$Overall_Timeout" == "xxOverall timeout" ]; then
+           log_status_and_exit_ex "PASS" "Syncpoint Overall timeout pass"
+       else
+           log_status_and_exit_ex "FAIL" "Syncpoint Overall timeout fail"
+    fi
+fi
+
+
+if [ "XX$T_Name" == "XXSMOKE-013-008" ]; then
+    if [ "xx$Vuser_TimeOut" == "xxVuser inter arrival timeout" ]; then 
+        log_status_and_exit_ex "PASS" "Syncpoint Vuser inter arrival timeout"
+    else
+        log_status_and_exit_ex "FAIL" "SyncPoint Vuser inter arrival timeout"
+    fi
+fi
+
+exit 0

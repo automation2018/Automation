@@ -1,0 +1,379 @@
+#!/bin/bash
+
+source $NS_WDIR/lib/automation_util
+T_NAME=$(get_tname)
+PAGE_FAIL=`grep -r "Page Failures" $NS_WDIR/logs/TR$T_RUN_ID/summary.data |awk '{print $2}' | cut -d '|' -f2`
+
+
+# Default Constants
+PATH_TO_TEST_RUN="$NS_WDIR/logs/TR$(get_testidx)"
+PARTITION_PATH="${PATH_TO_TEST_RUN}/$(get_test_partition)"
+PROGRESS_REPORT_FILE="${PATH_TO_TEST_RUN}/progress.report"
+SUMMARY_GDF_FILE="${PATH_TO_TEST_RUN}/summary_gdf.data"
+EVENT_LOG_FILE="${PARTITION_PATH}/event.log"
+MONITOR_LOG_FILE="${PARTITION_PATH}/monitor.log"
+REQUEST_RESPONSE_FILE="${PARTITION_PATH}/ns_logs/req_rep"
+REQ_REP_2nd_PAGE_PATH="${PARTITION_PATH}/ns_logs/req_rep/url_req_0_0_0_1_0_0_0_1_0.dat"
+REQ_REP_3rd_PAGE_PATH="${PARTITION_PATH}/ns_logs/req_rep/url_req_0_0_0_2_0_0_0_2_0.dat"
+REQ_REP_PATH="${PARTITION_PATH}/ns_logs/req_rep/url_req_0_0_0_0_0_0_0_0_0.dat"
+REQ_REP_FILE_PATH="${PARTITION_PATH}/ns_logs/req_rep/url_req_0_0_0_0_0_0_0_0_0.dat"
+
+
+function main() {
+    case $(get_tname) in
+        "SMOKE-009-001") handle_smoke_001_case ;;
+        "SMOKE-009-002") handle_smoke_002_case ;;
+        "SMOKE-009-003") handle_smoke_003_case ;;
+        "SMOKE-009-004") handle_smoke_004_case ;;
+        "SMOKE-009-005") handle_smoke_005_case ;;
+        "SMOKE-009-006") handle_smoke_006_case ;;
+        "SMOKE-009-007") handle_smoke_007_case ;;
+        "SMOKE-009-008") handle_smoke_008_case ;;
+        "SMOKE-009-009") handle_smoke_009_case ;;
+        "SMOKE-009-010") handle_smoke_010_case ;;
+        "SMOKE-009-011") handle_smoke_011_case ;;
+        "SMOKE-009-012") handle_smoke_012_case ;;
+        "SMOKE-009-013") handle_smoke_013_case ;;
+        "SMOKE-009-014") handle_smoke_014_case ;;
+        "SMOKE-009-015") handle_smoke_015_case ;;
+        "SMOKE-009-016") handle_smoke_016_case ;;
+        "SMOKE-009-017") handle_smoke_017_case ;;
+        "SMOKE-009-018") handle_smoke_018_case ;;
+        "SMOKE-009-019") handle_smoke_019_case ;;
+        "SMOKE-009-020") handle_smoke_020_case ;;
+        "SMOKE-009-021") handle_smoke_021_case ;;
+        "SMOKE-009-022") handle_smoke_022_case ;;
+        "SMOKE-009-023") handle_smoke_023_case ;;
+        "SMOKE-009-024") handle_smoke_024_case ;;
+        "SMOKE-009-025") handle_smoke_025_case ;;
+        "SMOKE-009-026") handle_smoke_026_case ;;
+        "SMOKE-009-027") handle_smoke_027_case ;;
+            *) handle_unknown_case ;;
+            ?) handle_unknown_case ;;
+    esac
+}
+
+function handle_unknown_case() {
+    log_status_and_exit_ex "FAIL" "Testcase Not Found"
+}
+
+
+#Cases for search var
+function handle_smoke_001_case() {
+   RESPONSE=`cat $T_ID_REQ_PATH/url_req_0_0_* | grep -o class2K.html?9`
+   if [ "$RESPONSE" == "class2K.html?9" ] && \
+      [ "XX$SD_TotalSuccURL" == "XX2" ];then
+       log_status_and_exit_ex "PASS" "Search in two main url Passed"
+   else
+       log_status_and_exit_ex "FAIL" "Search in two main url Failed"
+   fi 
+}
+
+function handle_smoke_002_case() {
+   RESPONSE_SEARCH_FAIL=`cat $T_ID_REQ_PATH/url_req_0_0_* | grep -o class2K.html?W`
+   if [ "$RESPONSE_SEARCH_FAIL" == "class2K.html?W" ] && \
+      [ "XX$SD_TotalSuccURL" == "XX2" ];then
+       log_status_and_exit_ex "PASS" "Search in two main url with savelength mode Passed"
+   else
+       log_status_and_exit_ex "FAIL" "Search in two main url with savelength mode Failed"
+   fi
+}
+   function handle_smoke_003_case() {
+   RESPONSE_SEARCH_FAIL=`cat $T_ID_REQ_PATH/url_req_0_0_* | grep -o class2K.html?99`
+   if [ "$RESPONSE_SEARCH_FAIL" == "class2K.html?99" ] && \
+      [ "XX$SD_TotalSuccURL" == "XX2" ];then
+       log_status_and_exit_ex "PASS" "Search for two main url with save length and save offset mode  Passed"
+   else
+       log_status_and_exit_ex "FAIL" "Search for two main url with save length and save offset mode Failed"
+   fi
+}
+
+function handle_smoke_004_case() {
+   RESPONSE_SEARCH_FAIL=`cat $T_ID_REQ_PATH/url_req_0_0_* | grep -o class2K.html?98`
+   if [ "XX$RESPONSE_SEARCH_FAIL" == "XX" ] && \
+      [ "XX$SD_TotalSuccURL" == "XX2" ];then
+       log_status_and_exit_ex "PASS" "Search for two main url with save length and save offset mode Passed"
+   else
+       log_status_and_exit_ex "FAIL" "Search for two main url with save length and save offset mode Failed"
+   fi
+}
+
+function handle_smoke_005_case() {
+   RESPONSE_SEARCH_FAIL=`cat $T_ID_REQ_PATH/url_req_0_0_* | grep -o /tours/index.html?ur`
+   if [ "$RESPONSE_SEARCH_FAIL" == "/tours/index.html?ur" ] && \
+      [ "XX$SD_TotalSuccURL" == "XX3" ];then
+       log_status_and_exit_ex "PASS" "Search for two main url with save length and save offset mode in 2 pages Passed"
+   else
+       log_status_and_exit_ex "FAIL" "Search for two main url with save length and save offset mode in 2 pages Failed"
+   fi
+}
+
+function handle_smoke_006_case() {
+   RESPONSE_SEARCH_FAIL=`cat $T_ID_REQ_PATH/url_req_0_0_* | grep -o /tours/index.html?ur`
+   if [ "$RESPONSE_SEARCH_FAIL" == "/tours/index.html?ur" ] && \
+      [ "XX$SD_TotalSuccURL" == "XX3" ];then
+       log_status_and_exit_ex "PASS" "Search for two main url with save length and save offset mode in 2 pages Passed"
+   else
+       log_status_and_exit_ex "FAIL" "Search for two main url with save length and save offset mode in 2 pages Failed"
+   fi
+}
+
+#Cases for Check Point
+function handle_smoke_007_case() {
+   if [ "XX$PAGE_FAIL" == "XX4" ];then
+       log_status_and_exit_ex "PASS" "Checkpoint with two main url check value found Passed"
+   else
+       log_status_and_exit_ex "FAIL" "Checkpoint with two main url check value found Failed"
+   fi
+}
+
+function handle_smoke_008_case() {
+   if [ "XX$PAGE_FAIL" == "XX4" ];then
+       log_status_and_exit_ex "PASS" "Checkpoint with two main url check value not found Passed"
+   else
+       log_status_and_exit_ex "FAIL" "Checkpoint with two main url check value not found Failed"
+   fi
+}
+
+function handle_smoke_009_case() {
+   if [ "XX$PAGE_FAIL" == "XX2" ];then
+       log_status_and_exit_ex "PASS" "Checkpoint with two main url check value with prefix and suffix found Passed"
+   else
+       log_status_and_exit_ex "FAIL" "Checkpoint with two main url check value with prefix and suffix found Failed"
+   fi
+}
+
+function handle_smoke_010_case() {
+   if [ "XX$PAGE_FAIL" == "XX2" ];then
+       log_status_and_exit_ex "PASS" "Checkpoint with two main url check value with prefix and suffix not found Passed"
+   else
+       log_status_and_exit_ex "FAIL" "Checkpoint with two main url check value with prefix and suffix not found Failed"
+   fi
+}
+
+function handle_smoke_011_case() {
+   if [ "XX$PAGE_FAIL" == "XX1" ] && \
+      [ "XX$SD_TotalSuccURL" == "XX2" ];then
+       log_status_and_exit_ex "PASS" "Checkpoint with two main url check value with prefix and suffix found and ActionOnfailContinue Passed"
+   else
+       log_status_and_exit_ex "FAIL" "Checkpoint with two main url check value with prefix and suffix found ActionOnfailContinue Failed"
+   fi
+}
+
+function handle_smoke_012_case() {
+   if [ "XX$PAGE_FAIL" == "XX1" ] && \
+      [ "XX$SD_TotalSuccURL" == "XX1" ];then
+       log_status_and_exit_ex "PASS" "Checkpoint with two main url check value with prefix and suffix not found ActionOnfailStop Passed"
+   else
+       log_status_and_exit_ex "FAIL" "Checkpoint with two main url check value with prefix and suffix not found ActionOnfailStop Failed"
+   fi
+}
+
+function handle_smoke_013_case() {
+   if [ "XX$PAGE_FAIL" == "XX2" ] && \
+      [ "XX$SD_TotalSuccURL" == "XX4" ];then
+       log_status_and_exit_ex "PASS" "Checkpoint with two main url check value with prefix and suffix found comparing from a file Passed"
+   else
+       log_status_and_exit_ex "FAIL" "Checkpoint with two main url check value with prefix and suffix found comparing from a file Failed"
+   fi
+}
+
+function handle_smoke_014_case() {
+   if [ "XX$PAGE_FAIL" == "XX2" ] && \
+      [ "XX$SD_TotalSuccURL" == "XX4" ];then
+       log_status_and_exit_ex "PASS" "Checkpoint with two main url check value with prefix and suffix not found Passed"
+   else
+       log_status_and_exit_ex "FAIL" "Checkpoint with two main url check value with prefix and suffix not found Failed"
+   fi
+}
+
+function handle_smoke_015_case() {
+if [ "XX$SD_TotalSuccURL" == "XX5" ];then
+   RESPONSE=`cat $T_ID_REQ_PATH/url_req_0_0_0_1_0_0_0_1_0.dat | grep -o class2K.html?Netstorm`
+   RESPONSE1=`cat $T_ID_REQ_PATH/url_req_0_0_0_2_0_0_0_2_0.dat | grep -o class2K.html?NetOcean`
+   RESPONSE2=`cat $T_ID_REQ_PATH/url_req_0_0_0_3_0_0_0_3_0.dat | grep -o class2K.html?NetFunction`
+   RESPONSE3=`cat $T_ID_REQ_PATH/url_req_0_0_0_4_0_0_0_4_0.dat | grep -o class2K.html?NetOmni`
+
+   if [ $RESPONSE == "class2K.html?Netstorm" ] && \
+      [ $RESPONSE1 == "class2K.html?NetOcean" ] && \
+      [ $RESPONSE2 == "class2K.html?NetFunction" ] && \
+      [ $RESPONSE3 == "class2K.html?NetOmni" ];then
+       log_status_and_exit_ex "PASS" "File Parameter 5 main url ChangeOnUse Passed"
+   else
+       log_status_and_exit_ex "FAIL" "File Parameter 5 main url ChangeOnUse Failed"
+   fi
+fi
+}
+
+function handle_smoke_016_case() {
+if [ "XX$SD_TotalSuccURL" == "XX20" ];then
+   RESPONSE_1Session=`cat $T_ID_REQ_PATH/url_req_0_0_0_1_0_0_0_1_0.dat | grep -o class2K.html?Netstorm`
+   RESPONSE_2Session=`cat $T_ID_REQ_PATH/url_req_0_0_1_1_0_0_0_1_0.dat | grep -o class2K.html?NetOcean`
+   RESPONSE_3Session=`cat $T_ID_REQ_PATH/url_req_0_0_2_1_0_0_0_1_0.dat | grep -o class2K.html?NetFunction`
+   RESPONSE_4Session=`cat $T_ID_REQ_PATH/url_req_0_0_3_1_0_0_0_1_0.dat | grep -o class2K.html?NetOmni`
+
+   if [ $RESPONSE_1Session == "class2K.html?Netstorm" ] && \
+      [ $RESPONSE_2Session == "class2K.html?NetOcean" ] && \
+      [ $RESPONSE_3Session == "class2K.html?NetFunction" ] && \
+      [ $RESPONSE_4Session == "class2K.html?NetOmni" ];then
+       log_status_and_exit_ex "PASS" "File Parameter 5 main url ChangeOnSession Passed"
+   else
+       log_status_and_exit_ex "FAIL" "File Parameter 5 main url ChangeOnSession Failed"
+   fi
+fi
+}
+
+function handle_smoke_017_case() {
+    if [ $SD_TotalSuccURL -eq 5 ];then 
+        log_status_and_exit_ex "PASS" "File Parameter 5 url ModeWeighted Passed"
+    else
+        log_status_and_exit_ex "FAIL" "File Parameter 5 url ModeWeighted Failed"
+    fi
+}
+
+function handle_smoke_018_case() {
+   RESPONSE_SEARCH_FAIL=`cat $T_ID_REQ_PATH/url_req_0_0_* | grep -o class2K.html?9`
+   if [ "X$RESPONSE_SEARCH_FAIL" == "X" ] && [ "XX$SD_TotalSuccURL" == "XX2" ];then
+       echo "Passing..."
+       log_status_and_exit_ex "PASS" "Serach Param for two main url Passed"
+   else
+       echo "Failing..."
+       log_status_and_exit_ex "FAIL" "Search Param for two main url Failed"
+   fi
+}
+
+function handle_smoke_019_case() {
+    REQ_QUERY=`grep "GET" $T_ID_REQ_PATH/url_req_0_0_0_1_0_0_0_1_0.dat | cut -d '?' -f2 | cut -d 'H' -f1`
+    REP_MSG=`grep -o -m1 "400 Bad Request" $T_ID_REQ_PATH/url_rep_0_0_0_1_0_0_0_1_0.dat`
+    if [ "$REQ_QUERY" ==  " is  " ] && \
+       [ "$REP_MSG" == "400 Bad Request" ] && \
+       [ $SD_TotalSuccURL -eq 1 ];then
+        echo "Values matched"
+        log_status_and_exit_ex "PASS" "Search Param for 5 url with single page search savelenght and saveoffset and ORD all Passed"
+    else
+        echo "Values didnt match"
+       log_status_and_exit_ex "FAIL" "Search Param for 5 url with single page search savelenght and saveoffset and ORD all Failed"
+    fi
+}
+
+function handle_smoke_020_case() {
+    today_date=`date +%m-%d-%Y|sed 's/-/\%2F/g'`
+    exp_date=`date -d"2 year"  +%m-%d-%Y|sed 's/-/\%2F/g'`
+    resp_today_date_count=`grep -c "=${today_date}" $T_ID_REQ_PATH/url_req_0_0_0_3_0_0_0_3_0.dat`
+    resp_exp_date_count=`grep -c "&expDate=${exp_date}" $T_ID_REQ_PATH/url_req_0_0_0_5_0_0_0_5_0.dat`
+    if [ $resp_today_date_count -eq 10 ] && \
+       [ $resp_exp_date_count -eq 9 ];then
+        debug_log "Date parametrization testcase passed"
+        log_status_and_exit_ex "PASS" "Date parametrization testcase passed"
+    else
+        debug_log "Date parametrization testcase failed"
+        log_status_and_exit_ex "FAIL" "Date parametrization testcase failed"
+
+    fi
+}
+
+function handle_smoke_021_case() {
+    total_credit_card=`grep "creditcard=" $REQUEST_RESPONSE_FILE/url_req* | cut -d'=' -f3 | sort -n | uniq | wc -l`
+    debug_log "Total credit card count: $total_credit_card"
+    if [ $total_credit_card -eq 21 ];
+    then
+        log_status_and_exit_ex "PASS" "nsl_unique_number_var keyword is validated using Refresh Mode: Use"
+    else
+        log_status_and_exit_ex "FAIL" "nsl_unique_number_var keyword is not funtioning properly in Refresh Mode: Use"
+    fi
+}
+
+function handle_smoke_022_case() {
+    session_1=`grep "creditcard=" $REQUEST_RESPONSE_FILE/url_req_0_0_0_* | cut -d'=' -f3 | sort -n | uniq | wc -l`
+    session_2=`grep "creditcard=" $REQUEST_RESPONSE_FILE/url_req_0_0_1_* | cut -d'=' -f3 | sort -n | uniq | wc -l`
+    session_3=`grep "creditcard=" $REQUEST_RESPONSE_FILE/url_req_0_0_2_* | cut -d'=' -f3 | sort -n | uniq | wc -l`
+    debug_log "No of unique credit card used in session 1: $session_1"
+    debug_log "No of unique credit card used in session 1: $session_2"
+    debug_log "No of unique credit card used in session 1: $session_3"
+    if [ $session_1 -eq 1 ] && [ $session_2 -eq 1 ] && [ $session_3 -eq 1 ];
+    then
+        log_status_and_exit_ex "PASS" "nsl_unique_number_var keyword is validated using Refresh Mode Session"
+    else
+        log_status_and_exit_ex "FAIL" "nsl_unique_number_var keyword is not funtioning properly in Refresh Mode Session"
+    fi
+}
+
+function handle_smoke_023_case() {
+    uniq_val=($(grep "random" ${REQUEST_RESPONSE_FILE}/url_req* | cut -d"=" -f3 | uniq |wc -l))
+    debug_log "number of sessions:${uniq_val}"
+    for (( i=0 ; i < ${uniq_val}; i++ ))
+    do
+        sess_strlen=$(grep "random" ${REQUEST_RESPONSE_FILE}/url_req_0_0_$i* | cut -d"=" -f3 | uniq |wc -c)
+        sess_strpar=$(grep "random" ${REQUEST_RESPONSE_FILE}/url_req_0_0_$i* | cut -d"=" -f3 | wc -l)
+        sess_value=$(grep "random" ${REQUEST_RESPONSE_FILE}/url_req_0_0_$i* | cut -d"=" -f3 | uniq |wc -l)
+        debug_log "string length=${sess_strlen} and value=${sess_value} and string parameters=${sess_strpar}"
+        if [ ${sess_strlen} -eq 7 ] && [ ${sess_strpar} -eq 7 ] && [ ${sess_value} -eq 1 ];then
+            log_status_and_exit_ex "PASS" "testcase is validated"
+        else
+            log_status_and_exit_ex "FAIL" "testcase is not validated"
+        fi
+    done
+}
+
+function handle_smoke_024_case() {
+    arr=($(grep "random" ${REQUEST_RESPONSE_FILE}/url_req* | cut -d"=" -f3))
+    arr_len=${#arr[@]}
+    debug_log "array length= ${arr_len}"
+    if [ ${arr_len} -ne 21 ];then
+        log_status_and_exit_ex "FAIL" "random string is not formed in any of files"
+    fi
+    for (( i=0 ; i < ${arr_len}; i++ ))
+    do
+        var_len=$(echo "${arr[$i]}" | wc -c)
+        if [ ${var_len} != 7 ];then
+            log_status_and_exit_ex "FAIL" "length of string is not satisfied"
+        fi
+    done
+    log_status_and_exit_ex "PASS" "condition is passed"
+}
+
+function handle_smoke_025_case() {
+    debug_log "Checking the json parameter"
+    json_1st_parameter=$(grep The $REQ_REP_2nd_PAGE_PATH | cut -d'=' -f3)
+    json_2nd_parameter=$(grep -o "number" $REQ_REP_3rd_PAGE_PATH)
+    debug_log "REQ_REP_2nd_Page: $REQ_REP_2nd_PAGE_PATH"
+    debug_log "REQ_REP_3rd_Page: $REQ_REP_3rd_PAGE_PATH"
+    debug_log "json 1st parameter: $json_1st_parameter"
+    debug_log "jso 2nd parameter: $json_2nd_parameter"
+    if [ "The unique identifier for a product" == "$json_1st_parameter" ];then
+        if [ "number" == "$json_2nd_parameter" ];then
+            log_status_and_exit_ex "PASS" "Expected data is matched with actual data in 2nd and 3rd Request Page Url"
+        else
+            log_status_and_exit_ex "FAIL" "Expected data don't matched with actual data in 3rd Request Page Url"
+        fi
+    else
+        log_status_and_exit_ex "FAIL" "Expected data don't matched with actual data in 2nd Request Page Url"
+    fi
+}
+
+function handle_smoke_026_case() {
+    debug_log "Checking array of string in reqrep file"
+    Array_String=$(grep netstorm $REQ_REP_PATH)
+    debug_log "In number of string: $Array_String"
+    if [ "netstorm;netstorm;netstorm;netstorm;netstorm;netstorm" == "$Array_String" ];then
+        log_status_and_exit_ex "PASS" "Req_Rep file data is matched with expected results"
+    else
+        log_status_and_exit_ex "FAIL" "Req_Rep file data is don't matched with expected results"
+    fi
+    #  log_status_int "FAIL" "Testcase SMOKE_001_001 has yet not been implemented"
+}
+
+function handle_smoke_027_case() {
+    debug_log "path:${REQ_REP_FILE_PATH}"
+    Exception_path=$(grep Declare "${REQ_REP_FILE_PATH}")
+    debug_log "array of size:$Exception_path"
+    if [ " Declare variable is {dec}...Declare Array value is{decarray_0}...This is netstorm tool ......Second_index..........Index(3)OutofBound" == "${Exception_path}" ];then
+        log_status_and_exit_ex "PASS" "Input size exceed array index"
+    else
+        log_status_and_exit_ex "FAIL" "Input size not exceed array index"
+    fi
+
+}
+
+main
+exit 0

@@ -1,0 +1,129 @@
+#!/bin/bash
+
+source $NS_WDIR/lib/automation_util
+
+REQ_FILE=${T_ID_REQ_PATH}/url_req_0_0_0_0_0_0_0_0_0.dat
+REP_FILE=${T_ID_REQ_PATH}/url_rep_0_0_0_0_0_0_0_0_0.dat
+P_FILE="/home/netstorm/work/logs/TR${T_RUN_ID}/progress.report"
+
+function main(){
+    case $(get_tname) in
+        "SMOKE-018-001") validate_NTLM_authentication ;;
+        "SMOKE-018-002") validate_NTLM_authentication_1 ;;
+        "SMOKE-018-003") validate_NTLM_authentication_2 ;;
+        "SMOKE-018-004") validate_NTLM_authentication_3 ;;
+        "SMOKE-018-005") validate_NTLM_authentication_4 ;;
+        "SMOKE-018-006") validate_NTLM_authentication_5 ;;
+        "SMOKE-018-007") validate_NTLM_authentication_6 ;;
+        "SMOKE-018-008") validate_NTLM_authentication_7 ;;
+        *) handle_unknown_case ;;
+        ?) handle_unknown_case ;;
+    esac
+}
+
+function handle_unknown_case(){
+    debug_log "unhandle"
+    log_status_and_exit_ex "FAIL" "Testcase not found"
+}
+
+function request_count(){
+    count=$1
+    req_count=$(grep -c "GET /" ${REQ_FILE})
+    debug_log "request count = $req_count"
+    [ $count -ne $req_count ] && log_status_and_exit_ex "FAIL" "NTLM authentication: Failed because of less number of requests"
+
+}
+function response_authorization_count(){
+    field=$1
+    count=$2
+    field_count=$(grep -c "$1" ${REP_FILE})
+    debug_log "$field count = $field_count"
+    [ $count -ne $field_count ] && log_status_and_exit_ex "FAIL" "NTLM authentication: Failed because $field  not found in reponse file"
+}
+
+#1.Test should be executed successfully. And netstorm should hit 3 URL and all should be success.
+#2.For Ex: (Completed 3/succ 3)
+#3.In request file there should be three requests as per NTLM working.
+#4.In response file there should be authorization header.
+function validate_NTLM_authentication_1(){
+    [ $SD_TotalSuccURL -ne 3 ] && log_status_and_exit_ex "FAIL" "NTLM authentication: Failed because URL success is not 3"
+    request_count 3
+    response_authorization_count "WWW-Authenticate" 3
+    response_authorization_count "WWW-Authenticate: NTLM" 2
+
+    log_status_and_exit_ex "PASS" "NTLM authentication: PASSED for NTLMCase OK"
+}
+
+function validate_NTLM_authentication_2(){
+    url_report=$(grep -w "Url  Report" ${P_FILE} | awk -F"TOT: " '{print $2}')
+    debug_log "NTLM url report: $url_report"
+    if [ "$url_report" != "completed 1/succ 0/AuthFail: 1" ];then
+        log_status_and_exit_ex "FAIL" "NTLM authentication: Failed as AuthFail not found in progress report"
+    fi
+    request_count 1
+    response_authorization_count "401 Unauthorized" 1
+
+    log_status_and_exit_ex "PASS" "NTLM authentication: PASSED for NTLMCase OK"
+}
+
+function validate_NTLM_authentication_3(){
+    url_report=$(grep -w "Url  Report" ${P_FILE} | awk -F"TOT: " '{print $2}')
+    debug_log "NTLM url report: $url_report"
+    if [ "$url_report" != "completed 2/succ 1/AuthFail: 1" ];then
+        log_status_and_exit_ex "FAIL" "NTLM authentication: Failed as AuthFail not found in progress report"
+    fi
+    request_count 2
+    response_authorization_count "401 Unauthorized" 2
+
+    log_status_and_exit_ex "PASS" "NTLM authentication: PASSED for NTLMCase OK"
+}
+
+function validate_NTLM_authentication_4(){
+    url_report=$(grep -w "Url  Report" ${P_FILE} | awk -F"TOT: " '{print $2}')
+    debug_log "NTLM url report: $url_report"
+    if [ "$url_report" != "completed 3/succ 2/AuthFail: 1" ];then
+        log_status_and_exit_ex "FAIL" "NTLM authentication: Failed as AuthFail not found in progress report"
+    fi
+    request_count 3
+    response_authorization_count "401 Unauthorized" 3
+
+    log_status_and_exit_ex "PASS" "NTLM authentication: PASSED for NTLMCase OK"
+}
+
+function validate_NTLM_authentication_5(){
+    url_report=$(grep -w "Url  Report" ${P_FILE} | awk -F"TOT: " '{print $2}')
+    debug_log "NTLM url report: $url_report"
+    if [ "$url_report" != "completed 3/succ 2/AuthFail: 1" ];then
+        log_status_and_exit_ex "FAIL" "NTLM authentication: Failed as AuthFail not found in progress report"
+    fi
+    request_count 3
+    response_authorization_count "WWW-Authenticate: NTLM" 2
+
+    log_status_and_exit_ex "PASS" "NTLM authentication: PASSED for NTLMCase OK"
+}
+
+function validate_NTLM_authentication_6(){
+    url_report=$(grep -w "Url  Report" ${P_FILE} | awk -F"TOT: " '{print $2}')
+    debug_log "NTLM url report: $url_report"
+    if [ "$url_report" != "completed 4/succ 4" ];then
+        log_status_and_exit_ex "FAIL" "NTLM authentication: as all url not get success"
+    fi
+    request_count 4
+    response_authorization_count "WWW-Authenticate: NTLM" 2
+
+    log_status_and_exit_ex "PASS" "NTLM authentication: PASSED for main URL authenticaton"
+}
+
+function validate_NTLM_authentication_7(){
+    url_report=$(grep -w "Url  Report" ${P_FILE} | awk -F"TOT: " '{print $2}')
+    debug_log "NTLM url report: $url_report"
+    if [ "$url_report" != "completed 6/succ 6" ];then
+        log_status_and_exit_ex "FAIL" "NTLM authentication: as all url not get success"
+    fi
+    request_count 6
+    response_authorization_count "WWW-Authenticate: NTLM" 4
+
+    log_status_and_exit_ex "PASS" "NTLM authentication: PASSED for main and inline URL authentication"
+}
+main
+exit 0
